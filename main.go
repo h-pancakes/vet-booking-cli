@@ -1,31 +1,32 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 )
 
 type Dog struct {
-	name string
-	breed string
+	name       string
+	breed      string
 	vaccinated bool
 }
 
 func (d *Dog) appointmentDecision() string {
 	if d.vaccinated {
-		return fmt.Sprintf("Thanks for booking your %s, %s for a checkup appointment! You will receive an email with the details. We look forward to seeing you and %s soon!", d.breed, d.name, d.name)
-	} else {
-		return fmt.Sprintf("Sorry! We cannot book an appointment without having %s vaccinated. Please book a vaccination appointment.", d.name)
+		return fmt.Sprintf(
+			"%s (%s) is vaccinated! Booking regular checkup appointment...", d.name, d.breed,
+		)
 	}
+	return fmt.Sprintf(
+		"%s (%s) is NOT vaccinated! Please book a vaccination appointment first", d.name, d.breed,
+	)
 }
 
-// I was working on this function
-func bookAppointment(scanner *bufio.Scanner) {
+func bookAppointment(scanner *bufio.Scanner) []Dog {
 	dogCount := dogCounter()
 	dogs := make([]Dog, dogCount)
-	var input string
 
 	for i := 0; i < dogCount; i++ {
 		fmt.Println("Enter dog", i+1, "name: ")
@@ -35,21 +36,23 @@ func bookAppointment(scanner *bufio.Scanner) {
 		fmt.Println("Enter dog", i+1, "breed: ")
 		scanner.Scan()
 		dogs[i].breed = scanner.Text()
-		
+
 		fmt.Println("Is dog", i+1, "vaccinated? (y/n): ")
 		scanner.Scan()
-		input = scanner.Text()
+		input := scanner.Text()
 
-		if input == "y" {
+		switch input {
+		case "y":
 			dogs[i].vaccinated = true
-		} else if input == "n" {
+		case "n":
 			dogs[i].vaccinated = false
-		} else {
+		default:
 			fmt.Println("Invalid input!")
-			return
-		}	
+			return nil
+		}
 	}
 
+	return dogs
 }
 
 func dogCounter(scanner *bufio.Scanner) int {
@@ -59,11 +62,12 @@ func dogCounter(scanner *bufio.Scanner) int {
 	fmt.Println("Please enter how many dogs you are booking in today: ")
 	scanner.Scan()
 	dogCount, _ = strconv.Atoi(scanner.Text())
-	
+
 	return dogCount
 }
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	bookAppointment(scanner)
+	dogcount := dogCounter(scanner)
+	dogs := bookAppointment(scanner, dogcount)
 }
