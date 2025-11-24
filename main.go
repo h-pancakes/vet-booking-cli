@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // dog holds information about a pet being booked for an appointment.
@@ -18,12 +19,16 @@ type dog struct {
 func dogCounter(scanner *bufio.Scanner) int {
 	var dogCount int
 
-	fmt.Println("Hi and welcome to our booking service!")
+	fmt.Println("Welcome to our booking service!")
 	fmt.Println("Please enter how many dogs you are booking in today: ")
 	scanner.Scan()
 	dogCount, _ = strconv.Atoi(scanner.Text())
 
-	return dogCount
+	if dogCount > 0 && dogCount <= 20 {
+		return dogCount
+	} else {
+		panic("invalid input")
+	}
 }
 
 // bookAppointment collects user input to create a slice of Dogs.
@@ -31,9 +36,37 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 	dogs := make([]dog, dogCount)
 
 	for i := 0; i < dogCount; i++ {
+		var input string
+
 		fmt.Println("Enter dog", i+1, "name: ")
 		scanner.Scan()
-		dogs[i].name = scanner.Text()
+
+		input = scanner.Text()
+
+		input = strings.TrimSpace(input)
+
+		if len(input) < 1 {
+			panic("name too short")
+		}
+
+		if len(input) > 20 {
+			panic("name too long")
+		}
+
+		for _, c := range input {
+			if c >= 'A' && c <= 'Z' {
+				continue
+			}
+			if c >= 'a' && c <= 'z' {
+				continue
+			}
+			if c == ' ' {
+				continue
+			}
+			panic("invalid input")
+		}
+
+		dogs[i].name = input
 
 		fmt.Println("Enter dog", i+1, "breed: ")
 		scanner.Scan()
@@ -41,7 +74,7 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 
 		fmt.Println("Is dog", i+1, "vaccinated? (y/n): ")
 		scanner.Scan()
-		input := scanner.Text()
+		input = scanner.Text()
 
 		switch input {
 		case "y":
