@@ -7,12 +7,14 @@ import (
 	"strconv"
 )
 
-type Dog struct {
+// dog holds information about a pet being booked for an appointment.
+type dog struct {
 	name       string
 	breed      string
 	vaccinated bool
 }
 
+// dogCounter prompts the user to enter the number of dogs they wish to book an appointment for.
 func dogCounter(scanner *bufio.Scanner) int {
 	var dogCount int
 
@@ -24,8 +26,9 @@ func dogCounter(scanner *bufio.Scanner) int {
 	return dogCount
 }
 
-func bookAppointment(scanner *bufio.Scanner, dogCount int) []Dog {
-	dogs := make([]Dog, dogCount)
+// bookAppointment collects user input to create a slice of Dogs.
+func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
+	dogs := make([]dog, dogCount)
 
 	for i := 0; i < dogCount; i++ {
 		fmt.Println("Enter dog", i+1, "name: ")
@@ -54,7 +57,8 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []Dog {
 	return dogs
 }
 
-func (d *Dog) appointmentDecision() string {
+// appointmentDecision returns a message based on vaccination status.
+func (d *dog) appointmentDecision() string {
 	if d.vaccinated {
 		return fmt.Sprintf(
 			"%s (%s) is vaccinated! Booking regular checkup appointment...", d.name, d.breed,
