@@ -1,6 +1,7 @@
 # Improvement Tasks
 
-- [ ] Add validation for numeric dog count
+- [X] Add validation for numeric dog count
+- [ ] (Optional) Finish validation for name in bookAppointment().
 - [ ] Add validation and retry loop for the vaccinated (y/n) input
 - [ ] Handle scanner.Scan() failures (EOF or read errors)
 - [ ] Improve the final summary output formatting
