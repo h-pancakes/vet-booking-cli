@@ -1,12 +1,9 @@
 # Improvement Tasks
 
-- [X] Add validation for numeric dog count
-- [ ] (Optional) Finish validation for name in bookAppointment().
-- [ ] Add validation and retry loop for the vaccinated (y/n) input
-- [ ] Handle scanner.Scan() failures (EOF or read errors)
-- [ ] Improve the final summary output formatting
-- [ ] (Optional) Extract dog-input logic into a helper function to simplify bookAppointment
-- [ ] Add Dog age, weight, and remove breed
-- [ ] Add owner firstName, lastName, phone, and email
-- [ ] (Optional) Add map for breed options 
-- [ ] Add appointmentType and appointmentDate
+- [ ] Finish validation for fields in bookAppointment().
+- [ ] Implement error handling 
+- [ ] Consider refactoring bookAppointment()
+- [ ] Add breed set of allowed breeds
+- [ ] Add owner struct with fields: firstName(string), lastName(string), phone(string), and email(string)
+- [ ] (optional) Add appointmentType as a field for each dog 
+- [ ] Polish and make prompts and output more friendly
