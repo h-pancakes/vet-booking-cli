@@ -1,9 +1,12 @@
-# Improvement Tasks
+# To-do list
 
-- [ ] Finish validation for fields in bookAppointment().
-- [ ] Implement error handling (REMOVE PANICS)
-- [ ] Consider refactoring bookAppointment()
-- [ ] Add breed set of allowed breeds
+# FIXES
+- [X] Finish validation for fields in bookAppointment().
+- [X] Add breed set of allowed breeds
+- [ ] Implement actual error handling (REMOVE PANICS)
+- [ ] Refactor and split bookAppointment() into multiple functions
+
+# DESIGN IMPROVEMENTS
 - [ ] Add owner struct with fields: firstName(string), lastName(string), phone(string), and email(string)
-- [ ] (optional) Add appointmentType as a field for each dog 
+- [ ] Add appointmentType as a field for dog 
 - [ ] Polish and make prompts and output more friendly

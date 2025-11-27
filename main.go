@@ -17,6 +17,14 @@ type dog struct {
 	vaccinated bool
 }
 
+var allowedBreeds = []string{
+	"Labrador",
+	"Poodle",
+	"Beagle",
+	"Bulldog",
+	"Dachshund",
+}
+
 // dogCounter prompts the user to enter the number of dogs they wish to book an appointment for.
 func dogCounter(scanner *bufio.Scanner) int {
 	var dogCount int
@@ -26,10 +34,10 @@ func dogCounter(scanner *bufio.Scanner) int {
 	scanner.Scan()
 	dogCount, _ = strconv.Atoi(scanner.Text())
 
-	if dogCount > 0 && dogCount <= 20 {
+	if dogCount > 0 && dogCount <= 20 { // Need to add error handling here
 		return dogCount
 	} else {
-		panic("invalid input")
+		panic("invalid amount")
 	}
 }
 
@@ -37,25 +45,29 @@ func dogCounter(scanner *bufio.Scanner) int {
 func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 	dogs := make([]dog, dogCount)
 
-	for i := 0; i < dogCount; i++ { // Need to polish validation here
-		var input string
+	for i := 0; i < dogCount; i++ { /* Need to add error handling here */
+		var strInput string
+		var intInput int
+		var floatInput float64
 
 		fmt.Println("Enter dog", i+1, "name: ")
 		scanner.Scan()
 
-		input = scanner.Text()
+		strInput = scanner.Text()
 
-		input = strings.TrimSpace(input)
+		strInput = strings.TrimSpace(strInput)
 
-		if len(input) < 1 {
+		trimmed := strings.ReplaceAll(strInput, " ", "")
+
+		if len(trimmed) < 1 {
 			panic("name too short")
 		}
 
-		if len(input) > 20 {
+		if len(trimmed) > 20 {
 			panic("name too long")
 		}
 
-		for _, c := range input {
+		for _, c := range strInput {
 			if c >= 'A' && c <= 'Z' {
 				continue
 			}
@@ -65,28 +77,54 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 			if c == ' ' {
 				continue
 			}
-			panic("invalid input")
+			panic("invalid name")
 		}
 
-		dogs[i].name = input
+		dogs[i].name = strInput
 
-		fmt.Println("Enter dog", i+1, "breed: ") // Need to add validation here
+		fmt.Println("Enter dog", i+1, "breed: ") /* Need to add error handling here */
+		fmt.Println("Allowed Breeds:", allowedBreeds)
 		scanner.Scan()
-		dogs[i].breed = scanner.Text()
+		strInput = scanner.Text()
+		strInput = strings.TrimSpace(strInput)
+		strInput = strings.Title(strInput)
+		valid := false
+		for _, breed := range allowedBreeds {
+			if breed == strInput {
+				valid = true
+				break
+			}
+		}
 
-		fmt.Println("Enter dog", i+1, "age: ") // Need to add validation here
-		scanner.Scan()
-		dogs[i].age, _ = strconv.Atoi(scanner.Text())
+		if !valid {
+			panic("invalid breed")
+		}
 
-		fmt.Println("Enter dog", i+1, "weight: ") // Need to add validation here
+		dogs[i].breed = strInput
+
+		fmt.Println("Enter dog", i+1, "age: ") /* Need to add error handling here */
 		scanner.Scan()
-		dogs[i].weightKg, _ = strconv.ParseFloat(scanner.Text(), 64)
+		intInput, _ = strconv.Atoi(scanner.Text())
+		if intInput < 0 || intInput > 30 {
+			panic("invalid age")
+		}
+
+		dogs[i].age = intInput
+
+		fmt.Println("Enter dog", i+1, "weight: ") /* Need to add error handling here */
+		scanner.Scan()
+		floatInput, _ = strconv.ParseFloat(scanner.Text(), 64)
+		if floatInput < 1 || floatInput > 120 {
+			panic("invalid weight")
+		}
+
+		dogs[i].weightKg = floatInput
 
 		fmt.Println("Is dog", i+1, "vaccinated? (y/n): ")
 		scanner.Scan()
-		input = scanner.Text()
+		strInput = scanner.Text()
 
-		switch input {
+		switch strInput {
 		case "y":
 			dogs[i].vaccinated = true
 		case "n":
