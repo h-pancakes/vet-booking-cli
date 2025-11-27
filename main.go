@@ -12,6 +12,8 @@ import (
 type dog struct {
 	name       string
 	breed      string
+	age        int
+	weightKg   float64
 	vaccinated bool
 }
 
@@ -35,7 +37,7 @@ func dogCounter(scanner *bufio.Scanner) int {
 func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 	dogs := make([]dog, dogCount)
 
-	for i := 0; i < dogCount; i++ {
+	for i := 0; i < dogCount; i++ { // Need to polish validation here
 		var input string
 
 		fmt.Println("Enter dog", i+1, "name: ")
@@ -68,9 +70,17 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 
 		dogs[i].name = input
 
-		fmt.Println("Enter dog", i+1, "breed: ")
+		fmt.Println("Enter dog", i+1, "breed: ") // Need to add validation here
 		scanner.Scan()
 		dogs[i].breed = scanner.Text()
+
+		fmt.Println("Enter dog", i+1, "age: ") // Need to add validation here
+		scanner.Scan()
+		dogs[i].age, _ = strconv.Atoi(scanner.Text())
+
+		fmt.Println("Enter dog", i+1, "weight: ") // Need to add validation here
+		scanner.Scan()
+		dogs[i].weightKg, _ = strconv.ParseFloat(scanner.Text(), 64)
 
 		fmt.Println("Is dog", i+1, "vaccinated? (y/n): ")
 		scanner.Scan()
@@ -81,6 +91,10 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 			dogs[i].vaccinated = true
 		case "n":
 			dogs[i].vaccinated = false
+		case "Y":
+			dogs[i].vaccinated = true
+		case "N":
+			dogs[i].vaccinated = false
 		default:
 			fmt.Println("Invalid input!")
 			return nil
@@ -90,16 +104,19 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 	return dogs
 }
 
-// appointmentDecision returns a message based on vaccination status.
-func (d *dog) appointmentDecision() string {
-	if d.vaccinated {
-		return fmt.Sprintf(
-			"%s (%s) is vaccinated! Booking regular checkup appointment...", d.name, d.breed,
-		)
-	}
-	return fmt.Sprintf(
-		"%s (%s) is NOT vaccinated! Please book a vaccination appointment first", d.name, d.breed,
-	)
+// summaryString prints a summary of each dog's details
+func (d *dog) summaryString(i int) string {
+	var s string
+	s = "-------------------------------------\n"
+	s += fmt.Sprintf("Dog %d summary:\n", i)
+	s += fmt.Sprintf("Name: %s\n", d.name)
+	s += fmt.Sprintf("Breed: %s\n", d.breed)
+	s += fmt.Sprintf("Age: %d\n", d.age)
+	s += fmt.Sprintf("Weight (kg): %.2f\n", d.weightKg)
+	s += fmt.Sprintf("Vaccinated?: %t\n", d.vaccinated)
+	s += "-------------------------------------\n"
+
+	return s
 }
 
 func main() {
@@ -108,7 +125,7 @@ func main() {
 	dogCount := dogCounter(scanner)
 	dogs := bookAppointment(scanner, dogCount)
 
-	for _, d := range dogs {
-		fmt.Println(d.appointmentDecision())
+	for i, d := range dogs {
+		fmt.Println(d.summaryString(i + 1))
 	}
 }
