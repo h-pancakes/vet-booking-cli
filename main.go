@@ -41,104 +41,166 @@ func dogCounter(scanner *bufio.Scanner) int {
 	}
 }
 
-// bookAppointment collects user input to create a slice of Dogs.
-func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
-	dogs := make([]dog, dogCount)
+// getName prompts the user for a dog's name and validates it.
+func getName(scanner *bufio.Scanner, i int) (string, error) {
+	var input string
 
-	for i := 0; i < dogCount; i++ { /* Need to add error handling here */
-		var strInput string
-		var intInput int
-		var floatInput float64
+	fmt.Println("Enter dog", i+1, "name: ")
+	scanner.Scan()
 
-		fmt.Println("Enter dog", i+1, "name: ")
-		scanner.Scan()
+	input = scanner.Text()
 
-		strInput = scanner.Text()
+	input = strings.TrimSpace(input)
 
-		strInput = strings.TrimSpace(strInput)
+	trimmedInput := strings.ReplaceAll(input, " ", "")
 
-		trimmed := strings.ReplaceAll(strInput, " ", "")
+	if len(trimmedInput) < 1 {
+		return "", fmt.Errorf("name too short")
+	}
 
-		if len(trimmed) < 1 {
-			panic("name too short")
+	if len(trimmedInput) > 20 {
+		return "", fmt.Errorf("name too long")
+	}
+
+	for _, c := range input {
+		if c >= 'A' && c <= 'Z' {
+			continue
 		}
-
-		if len(trimmed) > 20 {
-			panic("name too long")
+		if c >= 'a' && c <= 'z' {
+			continue
 		}
-
-		for _, c := range strInput {
-			if c >= 'A' && c <= 'Z' {
-				continue
-			}
-			if c >= 'a' && c <= 'z' {
-				continue
-			}
-			if c == ' ' {
-				continue
-			}
-			panic("invalid name")
+		if c == ' ' {
+			continue
 		}
+		return "", fmt.Errorf("invalid name")
+	}
+	return input, nil
+}
 
-		dogs[i].name = strInput
+// getBreed asks for a dog's breed and ensures it matches an allowed option.
+func getBreed(scanner *bufio.Scanner, i int) (string, error) {
+	var input string
 
-		fmt.Println("Enter dog", i+1, "breed: ") /* Need to add error handling here */
-		fmt.Println("Allowed Breeds:", allowedBreeds)
-		scanner.Scan()
-		strInput = scanner.Text()
-		strInput = strings.TrimSpace(strInput)
-		strInput = strings.Title(strInput)
-		valid := false
-		for _, breed := range allowedBreeds {
-			if breed == strInput {
-				valid = true
-				break
-			}
-		}
+	fmt.Println("Enter dog", i+1, "breed: ")
+	fmt.Println("Allowed Breeds:", allowedBreeds)
 
-		if !valid {
-			panic("invalid breed")
-		}
+	scanner.Scan()
+	input = scanner.Text()
+	input = strings.TrimSpace(input)
+	input = strings.Title(input)
 
-		dogs[i].breed = strInput
+	valid := false
 
-		fmt.Println("Enter dog", i+1, "age: ") /* Need to add error handling here */
-		scanner.Scan()
-		intInput, _ = strconv.Atoi(scanner.Text())
-		if intInput < 0 || intInput > 30 {
-			panic("invalid age")
-		}
-
-		dogs[i].age = intInput
-
-		fmt.Println("Enter dog", i+1, "weight: ") /* Need to add error handling here */
-		scanner.Scan()
-		floatInput, _ = strconv.ParseFloat(scanner.Text(), 64)
-		if floatInput < 1 || floatInput > 120 {
-			panic("invalid weight")
-		}
-
-		dogs[i].weightKg = floatInput
-
-		fmt.Println("Is dog", i+1, "vaccinated? (y/n): ")
-		scanner.Scan()
-		strInput = scanner.Text()
-
-		switch strInput {
-		case "y":
-			dogs[i].vaccinated = true
-		case "n":
-			dogs[i].vaccinated = false
-		case "Y":
-			dogs[i].vaccinated = true
-		case "N":
-			dogs[i].vaccinated = false
-		default:
-			fmt.Println("Invalid input!")
-			return nil
+	for _, breed := range allowedBreeds {
+		if breed == input {
+			valid = true
+			break
 		}
 	}
 
+	if !valid {
+		return "", fmt.Errorf("invalid breed")
+	}
+	return input, nil
+}
+
+// getAge prompts the user for a dog's age and validates the range.
+func getAge(scanner *bufio.Scanner, i int) (int, error) {
+	var input int
+
+	fmt.Println("Enter dog", i+1, "age: ")
+	scanner.Scan()
+	input, _ = strconv.Atoi(scanner.Text())
+
+	if input < 0 || input > 30 {
+		return 0, fmt.Errorf("invalid age")
+	}
+	return input, nil
+}
+
+// getWeightKg prompts for the dog's weight in kilograms and validates the range.
+func getWeightKg(scanner *bufio.Scanner, i int) (float64, error) {
+	var input float64
+
+	fmt.Println("Enter dog", i+1, "weight (Kg): ")
+	scanner.Scan()
+	input, _ = strconv.ParseFloat(scanner.Text(), 64)
+
+	if input < 1 || input > 120 {
+		return 0, fmt.Errorf("invalid weight")
+	}
+	return input, nil
+}
+
+// getVaccinationStatus prompts for and validates the dog's vaccination status.
+func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
+	var input string
+
+	fmt.Println("Is dog", i+1, "vaccinated? (y/n): ")
+	scanner.Scan()
+	input = scanner.Text()
+
+	switch input {
+	case "y", "Y":
+		return true, nil
+	case "n", "N":
+		return false, nil
+	default:
+		return false, fmt.Errorf("invalid input")
+	}
+}
+
+// bookAppointment collects validated input for each dog and returns a slice of dogs.
+func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
+	dogs := make([]dog, dogCount)
+
+	for i := 0; i < dogCount; i++ {
+
+		for {
+			name, err := getName(scanner, i)
+			if err == nil {
+				dogs[i].name = name
+				break
+			}
+			fmt.Println("Error: ", err)
+		}
+
+		for {
+			breed, err := getBreed(scanner, i)
+			if err == nil {
+				dogs[i].breed = breed
+				break
+			}
+			fmt.Println("Error: ", err)
+		}
+
+		for {
+			age, err := getAge(scanner, i)
+			if err == nil {
+				dogs[i].age = age
+				break
+			}
+			fmt.Println("Error: ", err)
+		}
+
+		for {
+			weightKg, err := getWeightKg(scanner, i)
+			if err == nil {
+				dogs[i].weightKg = weightKg
+				break
+			}
+			fmt.Println("Error: ", err)
+		}
+
+		for {
+			vaccinationStatus, err := getVaccinationStatus(scanner, i)
+			if err == nil {
+				dogs[i].vaccinated = vaccinationStatus
+				break
+			}
+			fmt.Println("Error: ", err)
+		}
+	}
 	return dogs
 }
 

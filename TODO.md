@@ -4,7 +4,7 @@
 - [X] Finish validation for fields in bookAppointment().
 - [X] Add breed set of allowed breeds
 - [ ] Implement actual error handling (REMOVE PANICS)
-- [ ] Refactor and split bookAppointment() into multiple functions
+- [X] Refactor and split bookAppointment() into multiple functions
 
 # DESIGN IMPROVEMENTS
 - [ ] Add owner struct with fields: firstName(string), lastName(string), phone(string), and email(string)
