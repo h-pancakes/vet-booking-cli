@@ -26,7 +26,7 @@ var allowedBreeds = []string{
 }
 
 // dogCounter prompts the user to enter the number of dogs they wish to book an appointment for.
-func dogCounter(scanner *bufio.Scanner) int {
+func dogCounter(scanner *bufio.Scanner) (int, error) {
 	var dogCount int
 
 	fmt.Println("Welcome to our booking service!")
@@ -34,10 +34,12 @@ func dogCounter(scanner *bufio.Scanner) int {
 	scanner.Scan()
 	dogCount, _ = strconv.Atoi(scanner.Text())
 
-	if dogCount > 0 && dogCount <= 20 { // Need to add error handling here
-		return dogCount
+	if dogCount > 0 && dogCount <= 20 {
+		return dogCount, nil
+	} else if dogCount > 20 {
+		return 0, fmt.Errorf("input exceeds limit of 20 dogs")
 	} else {
-		panic("invalid amount")
+		return 0, fmt.Errorf("invalid number")
 	}
 }
 
@@ -222,7 +224,17 @@ func (d *dog) summaryString(i int) string {
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	dogCount := dogCounter(scanner)
+	var dogCount int
+
+	for {
+		count, err := dogCounter(scanner)
+		if err == nil {
+			dogCount = count
+			break
+		}
+		fmt.Println("Error: ", err)
+	}
+
 	dogs := bookAppointment(scanner, dogCount)
 
 	for i, d := range dogs {

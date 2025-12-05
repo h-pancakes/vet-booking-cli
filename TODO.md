@@ -3,7 +3,7 @@
 # FIXES
 - [X] Finish validation for fields in bookAppointment().
 - [X] Add breed set of allowed breeds
-- [ ] Implement actual error handling (REMOVE PANICS)
+- [X] Implement actual error handling (REMOVE PANICS)
 - [X] Refactor and split bookAppointment() into multiple functions
 
 # DESIGN IMPROVEMENTS
