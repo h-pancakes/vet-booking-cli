@@ -89,6 +89,7 @@ func getBreed(scanner *bufio.Scanner, i int) (string, error) {
 	scanner.Scan()
 	input = scanner.Text()
 	input = strings.TrimSpace(input)
+	input = strings.ToLower(input)
 	input = strings.Title(input)
 
 	valid := false
