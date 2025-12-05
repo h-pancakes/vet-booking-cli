@@ -10,11 +10,12 @@ import (
 
 // dog holds information about a pet being booked for an appointment.
 type dog struct {
-	name       string
-	breed      string
-	age        int
-	weightKg   float64
-	vaccinated bool
+	name            string
+	breed           string
+	age             int
+	weightKg        float64
+	vaccinated      bool
+	appointmentType string
 }
 
 var allowedBreeds = []string{
@@ -23,6 +24,14 @@ var allowedBreeds = []string{
 	"Beagle",
 	"Bulldog",
 	"Dachshund",
+}
+
+var allowedAppointmentTypes = []string{
+	"Grooming",
+	"Vaccination",
+	"Surgical",
+	"Bath",
+	"Dental",
 }
 
 // dogCounter prompts the user to enter the number of dogs they wish to book an appointment for.
@@ -153,6 +162,33 @@ func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 	}
 }
 
+func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
+	var input string
+
+	fmt.Println("Enter dog", i+1, "appointment type: ")
+	fmt.Println("Types: ", allowedAppointmentTypes)
+
+	scanner.Scan()
+	input = scanner.Text()
+	input = strings.TrimSpace(input)
+	input = strings.ToLower(input)
+	input = strings.Title(input)
+
+	valid := false
+
+	for _, appointmentType := range allowedAppointmentTypes {
+		if appointmentType == input {
+			valid = true
+			break
+		}
+	}
+
+	if !valid {
+		return "", fmt.Errorf("invalid type")
+	}
+	return input, nil
+}
+
 // bookAppointment collects validated input for each dog and returns a slice of dogs.
 func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 	dogs := make([]dog, dogCount)
@@ -203,6 +239,15 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 			}
 			fmt.Println("Error: ", err)
 		}
+
+		for {
+			appointmentType, err := getAppointmentType(scanner, i)
+			if err == nil {
+				dogs[i].appointmentType = appointmentType
+				break
+			}
+			fmt.Println("Error: ", err)
+		}
 	}
 	return dogs
 }
@@ -217,6 +262,7 @@ func (d *dog) summaryString(i int) string {
 	s += fmt.Sprintf("Age: %d\n", d.age)
 	s += fmt.Sprintf("Weight (kg): %.2f\n", d.weightKg)
 	s += fmt.Sprintf("Vaccinated?: %t\n", d.vaccinated)
+	s += fmt.Sprintf("Appointment Type: %s\n", d.appointmentType)
 	s += "-------------------------------------\n"
 
 	return s

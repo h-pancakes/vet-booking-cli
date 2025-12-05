@@ -7,6 +7,6 @@
 - [X] Refactor and split bookAppointment() into multiple functions
 
 # DESIGN IMPROVEMENTS
+- [X] Add appointmentType as a field for dog 
 - [ ] Add owner struct with fields: firstName(string), lastName(string), phone(string), and email(string)
-- [ ] Add appointmentType as a field for dog 
 - [ ] Polish and make prompts and output more friendly
