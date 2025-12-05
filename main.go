@@ -162,6 +162,7 @@ func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 	}
 }
 
+// getAppointmentType displays available appointment types and ensures the user picks an accepted type.
 func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
