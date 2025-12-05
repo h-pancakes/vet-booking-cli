@@ -38,17 +38,17 @@ var allowedAppointmentTypes = []string{
 func dogCounter(scanner *bufio.Scanner) (int, error) {
 	var dogCount int
 
-	fmt.Println("Welcome to our booking service!")
-	fmt.Println("Please enter how many dogs you are booking in today: ")
+	fmt.Println("Hi, and welcome to our booking service!")
+	fmt.Println("Please enter how many dogs you are booking appointments for: ")
 	scanner.Scan()
 	dogCount, _ = strconv.Atoi(scanner.Text())
 
 	if dogCount > 0 && dogCount <= 20 {
 		return dogCount, nil
 	} else if dogCount > 20 {
-		return 0, fmt.Errorf("input exceeds limit of 20 dogs")
+		return 0, fmt.Errorf("input exceeds limit of 20")
 	} else {
-		return 0, fmt.Errorf("invalid number")
+		return 0, fmt.Errorf("invalid input")
 	}
 }
 
@@ -56,7 +56,7 @@ func dogCounter(scanner *bufio.Scanner) (int, error) {
 func getName(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
-	fmt.Println("Enter dog", i+1, "name: ")
+	fmt.Println("Please enter dog", i+1, "name: ")
 	scanner.Scan()
 
 	input = scanner.Text()
@@ -66,11 +66,11 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 	trimmedInput := strings.ReplaceAll(input, " ", "")
 
 	if len(trimmedInput) < 1 {
-		return "", fmt.Errorf("name too short")
+		return "", fmt.Errorf("name must be at least 1 character")
 	}
 
 	if len(trimmedInput) > 20 {
-		return "", fmt.Errorf("name too long")
+		return "", fmt.Errorf("character limit is 20 characters")
 	}
 
 	for _, c := range input {
@@ -83,7 +83,7 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 		if c == ' ' {
 			continue
 		}
-		return "", fmt.Errorf("invalid name")
+		return "", fmt.Errorf("name can only contain characters A-Z and spaces")
 	}
 	return input, nil
 }
@@ -92,8 +92,8 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 func getBreed(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
-	fmt.Println("Enter dog", i+1, "breed: ")
-	fmt.Println("Allowed Breeds:", allowedBreeds)
+	fmt.Println("Please enter dog", i+1, "breed: ")
+	fmt.Println("Accepted Breeds:", allowedBreeds)
 
 	scanner.Scan()
 	input = scanner.Text()
@@ -111,7 +111,7 @@ func getBreed(scanner *bufio.Scanner, i int) (string, error) {
 	}
 
 	if !valid {
-		return "", fmt.Errorf("invalid breed")
+		return "", fmt.Errorf("please enter an accepted breed")
 	}
 	return input, nil
 }
@@ -120,12 +120,12 @@ func getBreed(scanner *bufio.Scanner, i int) (string, error) {
 func getAge(scanner *bufio.Scanner, i int) (int, error) {
 	var input int
 
-	fmt.Println("Enter dog", i+1, "age: ")
+	fmt.Println("Please enter dog", i+1, "age: ")
 	scanner.Scan()
 	input, _ = strconv.Atoi(scanner.Text())
 
 	if input < 0 || input > 30 {
-		return 0, fmt.Errorf("invalid age")
+		return 0, fmt.Errorf("age must be between 0 and 30 years")
 	}
 	return input, nil
 }
@@ -134,12 +134,12 @@ func getAge(scanner *bufio.Scanner, i int) (int, error) {
 func getWeightKg(scanner *bufio.Scanner, i int) (float64, error) {
 	var input float64
 
-	fmt.Println("Enter dog", i+1, "weight (Kg): ")
+	fmt.Println("Please enter dog", i+1, "weight (Kg): ")
 	scanner.Scan()
 	input, _ = strconv.ParseFloat(scanner.Text(), 64)
 
 	if input < 1 || input > 120 {
-		return 0, fmt.Errorf("invalid weight")
+		return 0, fmt.Errorf("weight must be between 1 and 120kg")
 	}
 	return input, nil
 }
@@ -165,8 +165,8 @@ func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
-	fmt.Println("Enter dog", i+1, "appointment type: ")
-	fmt.Println("Types: ", allowedAppointmentTypes)
+	fmt.Println("Please enter your requested appointment type for", i+1)
+	fmt.Println("Accepted types: ", allowedAppointmentTypes)
 
 	scanner.Scan()
 	input = scanner.Text()
@@ -184,7 +184,7 @@ func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
 	}
 
 	if !valid {
-		return "", fmt.Errorf("invalid type")
+		return "", fmt.Errorf("please enter an accepted appointment type")
 	}
 	return input, nil
 }
@@ -256,7 +256,7 @@ func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
 func (d *dog) summaryString(i int) string {
 	var s string
 	s = "-------------------------------------\n"
-	s += fmt.Sprintf("Dog %d summary:\n", i)
+	s += fmt.Sprintf("Summary for Dog %d\n", i)
 	s += fmt.Sprintf("Name: %s\n", d.name)
 	s += fmt.Sprintf("Breed: %s\n", d.breed)
 	s += fmt.Sprintf("Age: %d\n", d.age)
@@ -266,6 +266,7 @@ func (d *dog) summaryString(i int) string {
 	s += "-------------------------------------\n"
 
 	return s
+
 }
 
 func main() {
@@ -287,4 +288,6 @@ func main() {
 	for i, d := range dogs {
 		fmt.Println(d.summaryString(i + 1))
 	}
+
+	fmt.Println("Thank you for using our booking service!")
 }

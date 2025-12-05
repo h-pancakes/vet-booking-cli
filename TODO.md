@@ -8,5 +8,5 @@
 
 # DESIGN IMPROVEMENTS
 - [X] Add appointmentType as a field for dog 
+- [X] Polish and make prompts and output more friendly
 - [ ] Add owner struct with fields: firstName(string), lastName(string), phone(string), and email(string)
-- [ ] Polish and make prompts and output more friendly
