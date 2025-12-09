@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+type user struct {
+	firstName string
+	lastName  string
+	phone     string
+	email     string
+}
+
 // dog holds information about a pet being booked for an appointment.
 type dog struct {
 	name            string
@@ -34,11 +41,242 @@ var allowedAppointmentTypes = []string{
 	"Dental",
 }
 
+func getUserFirstName(scanner *bufio.Scanner) (string, error) {
+	var input string
+
+	fmt.Println("Welcome to our booking service!")
+	fmt.Println("Please enter your first name: ")
+	scanner.Scan()
+
+	input = scanner.Text()
+
+	input = strings.TrimSpace(input)
+
+	trimmedInput := strings.ReplaceAll(input, " ", "")
+
+	if len(trimmedInput) < 1 {
+		return "", fmt.Errorf("name must be at least 1 character")
+	}
+
+	if len(trimmedInput) > 20 {
+		return "", fmt.Errorf("character limit is 20 characters")
+	}
+
+	for _, c := range input {
+		if c >= 'A' && c <= 'Z' {
+			continue
+		}
+		if c >= 'a' && c <= 'z' {
+			continue
+		}
+		if c == ' ' {
+			continue
+		}
+		if c == '-' {
+			continue
+		}
+		return "", fmt.Errorf("name can only contain A-Z, hyphens, and spaces")
+	}
+	return input, nil
+}
+
+func getUserLastName(scanner *bufio.Scanner) (string, error) {
+	var input string
+
+	fmt.Println("Please enter your last name: ")
+	scanner.Scan()
+
+	input = scanner.Text()
+
+	input = strings.TrimSpace(input)
+
+	trimmedInput := strings.ReplaceAll(input, " ", "")
+
+	if len(trimmedInput) < 1 {
+		return "", fmt.Errorf("name must be at least 1 character")
+	}
+
+	if len(trimmedInput) > 20 {
+		return "", fmt.Errorf("character limit is 20 characters")
+	}
+
+	for _, c := range input {
+		if c >= 'A' && c <= 'Z' {
+			continue
+		}
+		if c >= 'a' && c <= 'z' {
+			continue
+		}
+		if c == ' ' {
+			continue
+		}
+		if c == '-' {
+			continue
+		}
+		return "", fmt.Errorf("name can only contain A-Z, hyphens, and spaces")
+	}
+	return input, nil
+}
+
+func getUserPhone(scanner *bufio.Scanner) (string, error) {
+	var input string
+
+	fmt.Println("Please enter your mobile phone number: ")
+	scanner.Scan()
+
+	input = scanner.Text()
+
+	input = strings.ReplaceAll(input, " ", "")
+
+	if len(input) < 10 {
+		return "", fmt.Errorf("invalid phone number")
+	}
+
+	if len(input) > 13 {
+		return "", fmt.Errorf("invalid phone number")
+	}
+
+	for i, c := range input {
+		if i == 0 && c == '+' {
+			continue
+		}
+		if c >= '0' && c <= '9' {
+			continue
+		}
+		return "", fmt.Errorf("invalid phone number")
+	}
+	return input, nil
+}
+
+func getUserEmail(scanner *bufio.Scanner) (string, error) {
+	var input string
+
+	fmt.Println("Please enter your email address: ")
+	scanner.Scan()
+
+	input = scanner.Text()
+
+	input = strings.ReplaceAll(input, " ", "")
+
+	if len(input) < 5 {
+		return "", fmt.Errorf("minimum email length is 5 characters")
+	}
+
+	if len(input) > 256 {
+		return "", fmt.Errorf("maximum email length is 256 characters")
+	}
+
+	count := 0
+	for _, c := range input {
+		if c == '@' {
+			count++
+		}
+	}
+	if count != 1 {
+		return "", fmt.Errorf("email must contain one @ symbol")
+	}
+
+	parts := strings.SplitN(input, "@", 2)
+	local := parts[0]
+	domain := parts[1]
+
+	if local == "" || domain == "" {
+		return "", fmt.Errorf("email must have text before and after '@'")
+	}
+
+	for i, d := range local {
+		if d >= 'A' && d <= 'Z' {
+			continue
+		}
+		if d >= 'a' && d <= 'z' {
+			continue
+		}
+		if d == '.' || d == '_' || d == '-' || d == '+' {
+			continue
+		}
+		if d >= '0' && d <= '9' {
+			continue
+		}
+		if i == 0 && d == '.' {
+			return "", fmt.Errorf("cannot begin or end email with '.'")
+		}
+		if i == len(local)-1 && d == '.' {
+			return "", fmt.Errorf("cannot begin or end email with '.'")
+		}
+		if i > 0 && local[i-1] == '.' && d == '.' {
+			return "", fmt.Errorf("cannot have consecutive dots in first part of email")
+		}
+		return "", fmt.Errorf("invalid email input")
+	}
+
+	for i, e := range domain {
+		if e >= 'A' && e <= 'Z' {
+			continue
+		}
+		if e >= 'a' && e <= 'z' {
+			continue
+		}
+		if e == '.' || e == '-' {
+			continue
+		}
+		if i == 0 && e == '.' {
+			return "", fmt.Errorf("cannot begin or end email with '.'")
+		}
+		if i == len(domain)-1 && e == '.' {
+			return "", fmt.Errorf("cannot begin or end email with '.'")
+		}
+		if i > 0 && domain[i-1] == '.' && e == '.' {
+			return "", fmt.Errorf("cannot have consecutive dots in second part of email")
+		}
+		return "", fmt.Errorf("invalid email input")
+	}
+	return input, nil
+}
+
+func gatherUserInfo(scanner *bufio.Scanner) user {
+	var user user
+
+	for {
+		firstName, err := getUserFirstName(scanner)
+		if err == nil {
+			user.firstName = firstName
+			break
+		}
+		fmt.Println("Error: ", err)
+	}
+	for {
+		lastName, err := getUserLastName(scanner)
+		if err == nil {
+			user.lastName = lastName
+			break
+		}
+		fmt.Println("Error: ", err)
+	}
+
+	for {
+		phone, err := getUserPhone(scanner)
+		if err == nil {
+			user.phone = phone
+			break
+		}
+		fmt.Println("Error: ", err)
+	}
+
+	for {
+		email, err := getUserEmail(scanner)
+		if err == nil {
+			user.email = email
+			break
+		}
+		fmt.Println("Error: ", err)
+	}
+	return user
+}
+
 // dogCounter prompts the user to enter the number of dogs they wish to book an appointment for.
 func dogCounter(scanner *bufio.Scanner) (int, error) {
 	var dogCount int
 
-	fmt.Println("Hi, and welcome to our booking service!")
 	fmt.Println("Please enter how many dogs you are booking appointments for: ")
 	scanner.Scan()
 	dogCount, _ = strconv.Atoi(scanner.Text())
@@ -81,6 +319,9 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 			continue
 		}
 		if c == ' ' {
+			continue
+		}
+		if c == '-' {
 			continue
 		}
 		return "", fmt.Errorf("name can only contain characters A-Z and spaces")
@@ -270,8 +511,24 @@ func (d *dog) summaryString(i int) string {
 
 }
 
+func (u *user) ownerSummaryString() string {
+	var s string
+	s = "-------------------------------------\n"
+	s += "Summary for owner:\n"
+	s += fmt.Sprintf("Name: %s\n", u.firstName)
+	s += fmt.Sprintf("Surname: %s\n", u.lastName)
+	s += fmt.Sprintf("Phone number: %s\n", u.phone)
+	s += fmt.Sprintf("Email address: %s\n", u.email)
+	s += "-------------------------------------\n"
+
+	return s
+
+}
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
+
+	user := gatherUserInfo(scanner)
 
 	var dogCount int
 
@@ -285,6 +542,8 @@ func main() {
 	}
 
 	dogs := bookAppointment(scanner, dogCount)
+
+	fmt.Println(user.ownerSummaryString())
 
 	for i, d := range dogs {
 		fmt.Println(d.summaryString(i + 1))
