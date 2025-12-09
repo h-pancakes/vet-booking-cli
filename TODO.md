@@ -11,3 +11,4 @@
 - [X] Polish and make prompts and output more friendly
 - [X] Add owner struct with fields: firstName(string), lastName(string), phone(string), and email(string)
 - [ ] Final polishing and validation finishing touches & documentation
+- [ ] Perhaps make name validation into one shared helper function between dog and owner
