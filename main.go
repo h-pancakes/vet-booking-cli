@@ -6,8 +6,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
+// user holds information about the user of the booking service
 type user struct {
 	firstName string
 	lastName  string
@@ -15,24 +17,35 @@ type user struct {
 	email     string
 }
 
-// dog holds information about a pet being booked for an appointment.
-type dog struct {
-	name            string
-	breed           string
-	age             int
-	weightKg        float64
-	vaccinated      bool
+// pet holds information about a pet
+type pet struct {
+	name       string
+	species    string
+	age        int
+	weightKg   float64
+	vaccinated bool
+}
+
+// appointment holds all information related to an appointment
+type appointment struct {
 	appointmentType string
+	pet             pet
+	vet             vet
+	dateTime        time.Time
 }
 
-var allowedBreeds = []string{
-	"Labrador",
-	"Poodle",
-	"Beagle",
-	"Bulldog",
-	"Dachshund",
+// vet holds information about vets
+type vet struct {
+	name string
 }
 
+// allowedSpecies holds the species options available to the user
+var allowedSpecies = []string{
+	"Dog",
+	"Cat",
+}
+
+// allowedAppointmentTypes holds the appointment type options available
 var allowedAppointmentTypes = []string{
 	"Grooming",
 	"Vaccination",
@@ -41,6 +54,15 @@ var allowedAppointmentTypes = []string{
 	"Dental",
 }
 
+// allowedVets holds the veterinarians available to the user
+var allowedVets = []string{
+	"Dr Smith",
+	"Dr Jones",
+	"Dr Patel",
+	"Dr Brown",
+}
+
+// getUserFirstName prompts the user for their first name and validates it
 func getUserFirstName(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -80,6 +102,7 @@ func getUserFirstName(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
+// getUserLastName prompts the user for their surname and validates it
 func getUserLastName(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -118,6 +141,7 @@ func getUserLastName(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
+// getUserPhone prompts the user for their telephone number and validates it
 func getUserPhone(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -148,6 +172,7 @@ func getUserPhone(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
+// getUserEmail prompts the user for their email address and validates it
 func getUserEmail(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -233,6 +258,7 @@ func getUserEmail(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
+// gatherUserInfo collects validated inputs for user and creates a user object
 func gatherUserInfo(scanner *bufio.Scanner) user {
 	var user user
 
@@ -273,28 +299,28 @@ func gatherUserInfo(scanner *bufio.Scanner) user {
 	return user
 }
 
-// dogCounter prompts the user to enter the number of dogs they wish to book an appointment for.
-func dogCounter(scanner *bufio.Scanner) (int, error) {
-	var dogCount int
+// petCounter prompts the user to enter the number of pets they wish to book an appointment for
+func petCounter(scanner *bufio.Scanner) (int, error) {
+	var petCount int
 
-	fmt.Println("Please enter how many dogs you are booking appointments for: ")
+	fmt.Println("Please enter how many pets you are booking appointments for: ")
 	scanner.Scan()
-	dogCount, _ = strconv.Atoi(scanner.Text())
+	petCount, _ = strconv.Atoi(scanner.Text())
 
-	if dogCount > 0 && dogCount <= 20 {
-		return dogCount, nil
-	} else if dogCount > 20 {
+	if petCount > 0 && petCount <= 20 {
+		return petCount, nil
+	} else if petCount > 20 {
 		return 0, fmt.Errorf("input exceeds limit of 20")
 	} else {
 		return 0, fmt.Errorf("invalid input")
 	}
 }
 
-// getName prompts the user for a dog's name and validates it.
+// getName prompts the user for a pet's name and validates it
 func getName(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
-	fmt.Println("Please enter dog", i+1, "name: ")
+	fmt.Println("Please enter pet", i+1, "name: ")
 	scanner.Scan()
 
 	input = scanner.Text()
@@ -329,12 +355,12 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 	return input, nil
 }
 
-// getBreed asks for a dog's breed and ensures it matches an allowed option.
-func getBreed(scanner *bufio.Scanner, i int) (string, error) {
+// getSpecies asks for a pet's species and ensures it matches an allowed option
+func getSpecies(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
-	fmt.Println("Please enter dog", i+1, "breed: ")
-	fmt.Println("Accepted Breeds:", allowedBreeds)
+	fmt.Println("Please enter pet", i+1, "species: ")
+	fmt.Println("Accepted species:", allowedSpecies)
 
 	scanner.Scan()
 	input = scanner.Text()
@@ -344,24 +370,24 @@ func getBreed(scanner *bufio.Scanner, i int) (string, error) {
 
 	valid := false
 
-	for _, breed := range allowedBreeds {
-		if breed == input {
+	for _, species := range allowedSpecies {
+		if species == input {
 			valid = true
 			break
 		}
 	}
 
 	if !valid {
-		return "", fmt.Errorf("please enter an accepted breed")
+		return "", fmt.Errorf("please enter an accepted species")
 	}
 	return input, nil
 }
 
-// getAge prompts the user for a dog's age and validates the range.
+// getAge prompts the user for a pet's age and validates the range
 func getAge(scanner *bufio.Scanner, i int) (int, error) {
 	var input int
 
-	fmt.Println("Please enter dog", i+1, "age: ")
+	fmt.Println("Please enter pet", i+1, "age: ")
 	scanner.Scan()
 	input, _ = strconv.Atoi(scanner.Text())
 
@@ -371,11 +397,11 @@ func getAge(scanner *bufio.Scanner, i int) (int, error) {
 	return input, nil
 }
 
-// getWeightKg prompts for the dog's weight in kilograms and validates the range.
+// getWeightKg prompts for the pet's weight in kilograms and validates the range
 func getWeightKg(scanner *bufio.Scanner, i int) (float64, error) {
 	var input float64
 
-	fmt.Println("Please enter dog", i+1, "weight (Kg): ")
+	fmt.Println("Please enter pet", i+1, "weight (Kg): ")
 	scanner.Scan()
 	input, _ = strconv.ParseFloat(scanner.Text(), 64)
 
@@ -385,11 +411,11 @@ func getWeightKg(scanner *bufio.Scanner, i int) (float64, error) {
 	return input, nil
 }
 
-// getVaccinationStatus prompts for and validates the dog's vaccination status.
+// getVaccinationStatus prompts for and validates the pet's vaccination status
 func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 	var input string
 
-	fmt.Println("Is dog", i+1, "vaccinated? (y/n): ")
+	fmt.Println("Is pet", i+1, "vaccinated? (y/n): ")
 	scanner.Scan()
 	input = scanner.Text()
 
@@ -403,7 +429,7 @@ func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 	}
 }
 
-// getAppointmentType displays available appointment types and ensures the user picks an accepted type.
+// getAppointmentType displays available appointment types and ensures the user picks an accepted type
 func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
@@ -431,86 +457,154 @@ func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
 	return input, nil
 }
 
-// bookAppointment collects validated input for each dog and returns a slice of dogs.
-func bookAppointment(scanner *bufio.Scanner, dogCount int) []dog {
-	dogs := make([]dog, dogCount)
+// getVet displays available vets and ensures the user chooses a preferred vet
+func getVet(scanner *bufio.Scanner, i int) (vet, error) {
+	var input string
 
-	for i := 0; i < dogCount; i++ {
+	fmt.Println("Please choose preferred vet for appointment", i+1)
+	fmt.Println("Available vets:", allowedVets)
+
+	scanner.Scan()
+	input = strings.TrimSpace(scanner.Text())
+
+	for _, v := range allowedVets {
+		if v == input {
+			return vet{name: v}, nil
+		}
+	}
+
+	return vet{}, fmt.Errorf("please choose a valid vet")
+}
+
+func getPreferredDateTime(scanner *bufio.Scanner, i int) (time.Time, error) {
+	fmt.Println("Please enter preferred date and time for appointment", i+1)
+	fmt.Println("Format: YYYY-MM-DD HH:MM (24-hour time)")
+	fmt.Println("Example: 2026-01-13 12:30")
+
+	scanner.Scan()
+	input := strings.TrimSpace(scanner.Text())
+
+	layout := "2006-01-02 15:04"
+	t, err := time.Parse(layout, input)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid date/time format")
+	}
+
+	if t.Before(time.Now()) {
+		return time.Time{}, fmt.Errorf("Appointment cannot be in the past")
+	}
+
+	return t, nil
+}
+
+// bookAppointment collects validated input for each pet and returns a slice of pets
+func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
+	appointments := make([]appointment, 0, petCount)
+
+	for i := 0; i < petCount; i++ {
+
+		var d pet
 
 		for {
 			name, err := getName(scanner, i)
 			if err == nil {
-				dogs[i].name = name
+				d.name = name
 				break
 			}
-			fmt.Println("Error: ", err)
+			fmt.Println("Error:", err)
 		}
 
 		for {
-			breed, err := getBreed(scanner, i)
+			breed, err := getSpecies(scanner, i)
 			if err == nil {
-				dogs[i].breed = breed
+				d.species = breed
 				break
 			}
-			fmt.Println("Error: ", err)
+			fmt.Println("Error:", err)
 		}
 
 		for {
 			age, err := getAge(scanner, i)
 			if err == nil {
-				dogs[i].age = age
+				d.age = age
 				break
 			}
-			fmt.Println("Error: ", err)
+			fmt.Println("Error:", err)
 		}
 
 		for {
 			weightKg, err := getWeightKg(scanner, i)
 			if err == nil {
-				dogs[i].weightKg = weightKg
+				d.weightKg = weightKg
 				break
 			}
-			fmt.Println("Error: ", err)
+			fmt.Println("Error:", err)
 		}
 
 		for {
-			vaccinationStatus, err := getVaccinationStatus(scanner, i)
+			vaccinated, err := getVaccinationStatus(scanner, i)
 			if err == nil {
-				dogs[i].vaccinated = vaccinationStatus
+				d.vaccinated = vaccinated
 				break
 			}
-			fmt.Println("Error: ", err)
+			fmt.Println("Error:", err)
 		}
+
+		var a appointment
 
 		for {
 			appointmentType, err := getAppointmentType(scanner, i)
 			if err == nil {
-				dogs[i].appointmentType = appointmentType
+				a.appointmentType = appointmentType
 				break
 			}
-			fmt.Println("Error: ", err)
+			fmt.Println("Error:", err)
 		}
+
+		for {
+			v, err := getVet(scanner, i)
+			if err == nil {
+				a.vet = v
+				break
+			}
+			fmt.Println("Error:", err)
+		}
+
+		for {
+			dt, err := getPreferredDateTime(scanner, i)
+			if err == nil {
+				a.dateTime = dt
+				break
+			}
+			fmt.Println("Error:", err)
+		}
+
+		a.pet = d
+		appointments = append(appointments, a)
 	}
-	return dogs
+
+	return appointments
 }
 
-// summaryString prints a summary of each dog's details
-func (d *dog) summaryString(i int) string {
+// summaryString prints a summary of the pet and appointment details
+func (a *appointment) summaryString(i int) string {
 	var s string
 	s = "-------------------------------------\n"
-	s += fmt.Sprintf("Summary for Dog %d\n", i)
-	s += fmt.Sprintf("Name: %s\n", d.name)
-	s += fmt.Sprintf("Breed: %s\n", d.breed)
-	s += fmt.Sprintf("Age: %d\n", d.age)
-	s += fmt.Sprintf("Weight (kg): %.2f\n", d.weightKg)
-	s += fmt.Sprintf("Vaccinated?: %t\n", d.vaccinated)
-	s += fmt.Sprintf("Appointment Type: %s\n", d.appointmentType)
+	s += fmt.Sprintf("Summary for Appointment %d\n", i)
+	s += fmt.Sprintf("Pet Name: %s\n", a.pet.name)
+	s += fmt.Sprintf("Species: %s\n", a.pet.species)
+	s += fmt.Sprintf("Age: %d\n", a.pet.age)
+	s += fmt.Sprintf("Weight (kg): %.2f\n", a.pet.weightKg)
+	s += fmt.Sprintf("Vaccinated?: %t\n", a.pet.vaccinated)
+	s += fmt.Sprintf("Appointment Type: %s\n", a.appointmentType)
+	s += fmt.Sprintf("Vet: %s\n", a.vet.name)
+	s += fmt.Sprintf("Appointment Date & Time: %s\n", a.dateTime.Format("Monday, 02 Jan 2006 at 15:04"))
 	s += "-------------------------------------\n"
 
 	return s
-
 }
 
+// ownerSummaryString prints a summary of the user's details
 func (u *user) ownerSummaryString() string {
 	var s string
 	s = "-------------------------------------\n"
@@ -522,7 +616,6 @@ func (u *user) ownerSummaryString() string {
 	s += "-------------------------------------\n"
 
 	return s
-
 }
 
 func main() {
@@ -530,22 +623,22 @@ func main() {
 
 	user := gatherUserInfo(scanner)
 
-	var dogCount int
+	var petCount int
 
 	for {
-		count, err := dogCounter(scanner)
+		count, err := petCounter(scanner)
 		if err == nil {
-			dogCount = count
+			petCount = count
 			break
 		}
 		fmt.Println("Error: ", err)
 	}
 
-	dogs := bookAppointment(scanner, dogCount)
+	appointments := bookAppointments(scanner, petCount)
 
 	fmt.Println(user.ownerSummaryString())
 
-	for i, d := range dogs {
+	for i, d := range appointments {
 		fmt.Println(d.summaryString(i + 1))
 	}
 
