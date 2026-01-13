@@ -14,7 +14,7 @@
 - [X] Finalise commenting
 
 # VERSION 2
-- [ ] Add navigable menus
+- [X] Add navigable menu
 
 # VERSION 3 - FINAL
 - [ ] Add PostgreSQL persistence - relational database

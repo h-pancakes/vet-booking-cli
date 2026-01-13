@@ -299,6 +299,17 @@ func gatherUserInfo(scanner *bufio.Scanner) user {
 	return user
 }
 
+// mainMenu presents the user with a menu after they log their personal details
+func mainMenu(scanner *bufio.Scanner) string {
+	fmt.Println("1. Create new appointment")
+	fmt.Println("2. View appointments")
+	fmt.Println("3. Exit")
+	fmt.Print("> ")
+
+	scanner.Scan()
+	return strings.TrimSpace(scanner.Text())
+}
+
 // petCounter prompts the user to enter the number of pets they wish to book an appointment for
 func petCounter(scanner *bufio.Scanner) (int, error) {
 	var petCount int
@@ -476,6 +487,7 @@ func getVet(scanner *bufio.Scanner, i int) (vet, error) {
 	return vet{}, fmt.Errorf("please choose a valid vet")
 }
 
+// getPreferredDateTime allows the user to enter a preferred time for their appointment
 func getPreferredDateTime(scanner *bufio.Scanner, i int) (time.Time, error) {
 	fmt.Println("Please enter preferred date and time for appointment", i+1)
 	fmt.Println("Format: YYYY-MM-DD HH:MM (24-hour time)")
@@ -619,28 +631,48 @@ func (u *user) ownerSummaryString() string {
 }
 
 func main() {
+	var currentUser *user
+	var appointments []appointment
+
 	scanner := bufio.NewScanner(os.Stdin)
 
-	user := gatherUserInfo(scanner)
-
-	var petCount int
+	u := gatherUserInfo(scanner)
+	currentUser = &u
 
 	for {
-		count, err := petCounter(scanner)
-		if err == nil {
-			petCount = count
-			break
+		userChoice := mainMenu(scanner)
+
+		switch userChoice {
+		case "1":
+			var petCount int
+			for {
+				count, err := petCounter(scanner)
+				if err == nil {
+					petCount = count
+					break
+				}
+				fmt.Println("Error:", err)
+			}
+
+			newAppointments := bookAppointments(scanner, petCount)
+			appointments = append(appointments, newAppointments...)
+
+		case "2":
+			if len(appointments) == 0 {
+				fmt.Println("No appointments yet.")
+				continue
+			}
+
+			fmt.Println(currentUser.ownerSummaryString())
+			for i, a := range appointments {
+				fmt.Println(a.summaryString(i + 1))
+			}
+		case "3":
+			fmt.Println("Thank you for using our booking service!")
+			return
+
+		default:
+			fmt.Println("Invalid option, please try again.")
 		}
-		fmt.Println("Error: ", err)
 	}
-
-	appointments := bookAppointments(scanner, petCount)
-
-	fmt.Println(user.ownerSummaryString())
-
-	for i, d := range appointments {
-		fmt.Println(d.summaryString(i + 1))
-	}
-
-	fmt.Println("Thank you for using our booking service!")
 }
