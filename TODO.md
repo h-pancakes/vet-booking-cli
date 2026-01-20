@@ -7,6 +7,7 @@
 - [ ] Final polishing and validation finishing touches & documentation
 - [ ] Perhaps make name validation into one shared helper function between dog and owner
 - [ ] Split code into separate files
+- [ ] Write tests
 
 # VERSION 1
 - [X] Add new structs - date & time, vets, types
@@ -17,5 +18,6 @@
 - [X] Add navigable menu
 
 # VERSION 3 - FINAL
-- [ ] Add PostgreSQL persistence - relational database
+- [X] Add PostgreSQL persistence - relational database
+- [ ] Make Postgres work for users downloading from github repository
 - [ ] Add a README file

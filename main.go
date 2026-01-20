@@ -2,11 +2,14 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 // user holds information about the user of the booking service
@@ -636,8 +639,32 @@ func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 
+	db, err := sql.Open(
+		"postgres",
+		"user=vetapp password=vetpass dbname=vet_booking sslmode=disable",
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
 	u := gatherUserInfo(scanner)
 	currentUser = &u
+
+	var userID int
+
+	err = db.QueryRow(
+		`INSERT INTO users (first_name, last_name, phone, email)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id`,
+		u.firstName,
+		u.lastName,
+		u.phone,
+		u.email,
+	).Scan(&userID)
+	if err != nil {
+		panic(err)
+	}
 
 	for {
 		userChoice := mainMenu(scanner)
@@ -656,6 +683,34 @@ func main() {
 
 			newAppointments := bookAppointments(scanner, petCount)
 			appointments = append(appointments, newAppointments...)
+
+			for _, a := range newAppointments {
+				_, err := db.Exec(
+					`INSERT INTO appointments (
+					user_id,
+					pet_name,
+					pet_species,
+					pet_age,
+					pet_weight,
+					vaccinated,
+					appointment_type,
+					vet_name,
+					appointment_time
+					) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+					userID,
+					a.pet.name,
+					a.pet.species,
+					a.pet.age,
+					a.pet.weightKg,
+					a.pet.vaccinated,
+					a.appointmentType,
+					a.vet.name,
+					a.dateTime,
+				)
+				if err != nil {
+					panic(err)
+				}
+			}
 
 		case "2":
 			if len(appointments) == 0 {
