@@ -1,10 +1,11 @@
 # To-do list - DEADLINE FEBRUARY
 
-# PRIORITISED IMPROVEMENTS
+# OPTIONAL IMPROVEMENTS
 - [X] Rewrite comments and documentation - easy
-- [ ] Simplify existing validation and standardise it - medium
-- [ ] Create way to log in using table ID - medium
-- [ ] Refactor SQL sections - hard
+- [X] Simplify existing validation and standardise it - medium
+- [X] Create way to log in using table ID - medium
+- [X] Refactor SQL sections - hard
+- [ ] Add a way for users to cancel appointments - hard
 - [ ] Split code into separate files - hard
 - [ ] Write tests - v.hard
 
@@ -18,5 +19,5 @@
 
 # VERSION 3 - FINAL
 - [X] Add PostgreSQL persistence - relational database
-- [ ] Make Postgres work for users downloading from github repository
-- [ ] Add a README file
+- [X] Make Postgres work for users downloading from github repository
+- [X] Add a README file

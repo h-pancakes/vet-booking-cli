@@ -63,6 +63,108 @@ var allowedVets = []string{
 	"Dr Brown",
 }
 
+// mainMenu is a function displays a menu screen to the user with 3 options.
+// The option that the user selects is normalised and then passed to main().
+func mainMenu(scanner *bufio.Scanner) string {
+	fmt.Println("1. New user")
+	fmt.Println("2. Existing user")
+	fmt.Println("3. Exit")
+	fmt.Print("> ")
+
+	scanner.Scan()
+	return strings.TrimSpace(scanner.Text())
+}
+
+// getExistingUser is a special function that is called when the user selects option "2" in the main menu to indicate they are an existing user.
+// The function prompts the user to enter their login ID to access their appointments saved on the database.
+// The user's input is normalised, and subsequently validated and the database is queried for a row with a matching ID.
+// If there is a matching ID, that row's contents are fetched and placed in memory.
+func getExistingUser(scanner *bufio.Scanner, db *sql.DB) (*user, int, error) {
+	fmt.Println("Please enter your login ID:")
+	fmt.Print("> ")
+
+	scanner.Scan()
+	input := strings.TrimSpace(scanner.Text())
+
+	id, err := strconv.Atoi(input)
+	if err != nil || id <= 0 {
+		return nil, 0, fmt.Errorf("login ID must be a positive number")
+	}
+
+	var u user
+
+	err = db.QueryRow(
+		`SELECT first_name, last_name, phone, email
+		 FROM users
+		 WHERE id = $1`,
+		id,
+	).Scan(
+		&u.firstName,
+		&u.lastName,
+		&u.phone,
+		&u.email,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, 0, fmt.Errorf("no user found with that ID")
+	}
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return &u, id, nil
+}
+
+// getAppointmentsByUserID is a special function that is called when the user selects option "2" in the appointment menu to display their current appointments
+// This function queries the database using the user's previously submitted ID to fetch and save in memory any appointments tied to that user.
+// Any appointments in the database are returned in a list format.
+func getAppointmentsByUserID(db *sql.DB, userID int) ([]appointment, error) {
+	rows, err := db.Query(
+		`SELECT
+			pet_name,
+			pet_species,
+			pet_age,
+			pet_weight,
+			vaccinated,
+			appointment_type,
+			vet_name,
+			appointment_time
+		FROM appointments
+		WHERE user_id = $1`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var appointments []appointment
+
+	for rows.Next() {
+		var a appointment
+		var p pet
+
+		err := rows.Scan(
+			&p.name,
+			&p.species,
+			&p.age,
+			&p.weightKg,
+			&p.vaccinated,
+			&a.appointmentType,
+			&a.vet,
+			&a.dateTime,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		a.pet = p
+		appointments = append(appointments, a)
+	}
+
+	return appointments, nil
+}
+
 // getUserFirstName is a helper function that prompts the user for their first name and then stores it.
 // The stored name is then normalised by removing unnecessary whitespace.
 // The name is passed through multiple validation checks and returned, if it passes all checks.
@@ -103,6 +205,8 @@ func getUserFirstName(scanner *bufio.Scanner) (string, error) {
 		}
 		return "", fmt.Errorf("name can only contain A-Z, hyphens, and spaces")
 	}
+
+	input = strings.Title(input)
 	return input, nil
 }
 
@@ -145,6 +249,8 @@ func getUserLastName(scanner *bufio.Scanner) (string, error) {
 		}
 		return "", fmt.Errorf("name can only contain A-Z, hyphens, and spaces")
 	}
+
+	input = strings.Title(input)
 	return input, nil
 }
 
@@ -163,11 +269,11 @@ func getUserPhone(scanner *bufio.Scanner) (string, error) {
 	input = strings.ReplaceAll(input, " ", "")
 
 	if len(input) < 10 {
-		return "", fmt.Errorf("invalid phone number")
+		return "", fmt.Errorf("phone number must be more than 10 characters")
 	}
 
 	if len(input) > 13 {
-		return "", fmt.Errorf("invalid phone number")
+		return "", fmt.Errorf("phone number must be smaller than 13 characters")
 	}
 
 	for i, c := range input {
@@ -177,7 +283,7 @@ func getUserPhone(scanner *bufio.Scanner) (string, error) {
 		if c >= '0' && c <= '9' {
 			continue
 		}
-		return "", fmt.Errorf("invalid phone number")
+		return "", fmt.Errorf("phone number can only have digits 0-9, +, and must be between 10 and 13 characters")
 	}
 	return input, nil
 }
@@ -315,11 +421,11 @@ func gatherUserInfo(scanner *bufio.Scanner) user {
 	return user
 }
 
-// mainMenu is a function displays a menu screen to the user with 3 options.
+// appointmentMenu is a function displays a menu screen to the user with 3 options.
 // The option that the user selects is normalised and then passed to main().
-func mainMenu(scanner *bufio.Scanner) string {
+func appointmentMenu(scanner *bufio.Scanner) string {
 	fmt.Println("1. Create new appointment")
-	fmt.Println("2. View appointments")
+	fmt.Println("2. View existing appointments")
 	fmt.Println("3. Exit")
 	fmt.Print("> ")
 
@@ -342,7 +448,7 @@ func petCounter(scanner *bufio.Scanner) (int, error) {
 	} else if petCount > 20 {
 		return 0, fmt.Errorf("input exceeds limit of 20")
 	} else {
-		return 0, fmt.Errorf("invalid input")
+		return 0, fmt.Errorf("input must have value between 0 and 20")
 	}
 }
 
@@ -385,6 +491,8 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 		}
 		return "", fmt.Errorf("name can only contain characters A-Z and spaces")
 	}
+
+	input = strings.Title(input)
 	return input, nil
 }
 
@@ -392,30 +500,22 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 // The input is stored and normalised.
 // If the input is not listed in "allowedSpecies", the user is prompted again.
 func getSpecies(scanner *bufio.Scanner, i int) (string, error) {
-	var input string
-
 	fmt.Println("Please enter pet", i+1, "species: ")
-	fmt.Println("Accepted species:", allowedSpecies)
+
+	for i, v := range allowedSpecies {
+		fmt.Printf("%d. %s\n", i+1, v)
+	}
+	fmt.Print("> ")
 
 	scanner.Scan()
-	input = scanner.Text()
-	input = strings.TrimSpace(input)
-	input = strings.ToLower(input)
-	input = strings.Title(input)
+	input := strings.TrimSpace(scanner.Text())
 
-	valid := false
-
-	for _, species := range allowedSpecies {
-		if species == input {
-			valid = true
-			break
-		}
+	choice, err := strconv.Atoi(input)
+	if err != nil || choice < 1 || choice > len(allowedSpecies) {
+		return "", fmt.Errorf("please select one of the species displayed")
 	}
 
-	if !valid {
-		return "", fmt.Errorf("please enter an accepted species")
-	}
-	return input, nil
+	return allowedSpecies[choice-1], nil
 }
 
 // getAge is a helper function that prompts the user for their pet's age and stores it.
@@ -468,7 +568,7 @@ func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 	case "n", "N":
 		return false, nil
 	default:
-		return false, fmt.Errorf("invalid input")
+		return false, fmt.Errorf("input must be y/n")
 	}
 }
 
@@ -476,51 +576,44 @@ func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 // The input is stored and normalised.
 // If the input is not listed in "allowedAppointmentTypes", the user is prompted again.
 func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
-	var input string
+	fmt.Println("Please enter appointment type for", i+1)
 
-	fmt.Println("Please enter your requested appointment type for", i+1)
-	fmt.Println("Accepted types: ", allowedAppointmentTypes)
+	for i, v := range allowedAppointmentTypes {
+		fmt.Printf("%d. %s\n", i+1, v)
+	}
+	fmt.Print("> ")
 
 	scanner.Scan()
-	input = scanner.Text()
-	input = strings.TrimSpace(input)
-	input = strings.ToLower(input)
-	input = strings.Title(input)
+	input := strings.TrimSpace(scanner.Text())
 
-	valid := false
-
-	for _, appointmentType := range allowedAppointmentTypes {
-		if appointmentType == input {
-			valid = true
-			break
-		}
+	choice, err := strconv.Atoi(input)
+	if err != nil || choice < 1 || choice > len(allowedAppointmentTypes) {
+		return "", fmt.Errorf("please select one of the appointment types displayed")
 	}
 
-	if !valid {
-		return "", fmt.Errorf("please enter an accepted appointment type")
-	}
-	return input, nil
+	return allowedAppointmentTypes[choice-1], nil
 }
 
 // getVet is a helper function that prompts the user to choose a preferred vet for their appointment and lists available options using the "allowedVets" list.
 // The input is stored and normalised.
 // If the input is not listed in "allowedAppointmentTypes", the user is prompted again.
 func getVet(scanner *bufio.Scanner, i int) (string, error) {
-	var input string
-
 	fmt.Println("Please choose preferred vet for appointment", i+1)
-	fmt.Println("Available vets:", allowedVets)
+
+	for i, v := range allowedVets {
+		fmt.Printf("%d. %s\n", i+1, v)
+	}
+	fmt.Print("> ")
 
 	scanner.Scan()
-	input = strings.TrimSpace(scanner.Text())
+	input := strings.TrimSpace(scanner.Text())
 
-	for _, v := range allowedVets {
-		if v == input {
-			return v, nil
-		}
+	choice, err := strconv.Atoi(input)
+	if err != nil || choice < 1 || choice > len(allowedVets) {
+		return "", fmt.Errorf("please select one of the vets displayed")
 	}
 
-	return "", fmt.Errorf("please choose a valid vet")
+	return allowedVets[choice-1], nil
 }
 
 // getPreferredDateTime is a helper function that allows the user to enter a preferred date and time for their appointment.
@@ -646,7 +739,7 @@ func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
 func (a *appointment) summaryString(i int) string {
 	var s string
 	s = "-------------------------------------\n"
-	s += fmt.Sprintf("Summary for Appointment %d\n", i)
+	s += fmt.Sprintf("Appointment %d information:\n", i)
 	s += fmt.Sprintf("Pet Name: %s\n", a.pet.name)
 	s += fmt.Sprintf("Species: %s\n", a.pet.species)
 	s += fmt.Sprintf("Age: %d\n", a.pet.age)
@@ -664,7 +757,7 @@ func (a *appointment) summaryString(i int) string {
 func (u *user) ownerSummaryString() string {
 	var s string
 	s = "-------------------------------------\n"
-	s += "Summary for owner:\n"
+	s += "Owner details:\n"
 	s += fmt.Sprintf("Name: %s\n", u.firstName)
 	s += fmt.Sprintf("Surname: %s\n", u.lastName)
 	s += fmt.Sprintf("Phone number: %s\n", u.phone)
@@ -677,38 +770,71 @@ func (u *user) ownerSummaryString() string {
 func main() {
 	var currentUser *user
 	var appointments []appointment
+	var userID int
 
 	scanner := bufio.NewScanner(os.Stdin)
 
-	db, err := sql.Open(
-		"postgres",
-		"user=vetapp password=vetpass dbname=vet_booking sslmode=disable",
-	)
+	connStr := os.Getenv("DATABASE_URL")
+	if connStr == "" {
+		fmt.Println("DATABASE_URL environment variable not set")
+		return
+	}
+
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	u := gatherUserInfo(scanner)
-	currentUser = &u
+	for {
+		choice := mainMenu(scanner)
 
-	var userID int
+		switch choice {
+		case "1":
+			u := gatherUserInfo(scanner)
+			currentUser = &u
 
-	err = db.QueryRow(
-		`INSERT INTO users (first_name, last_name, phone, email)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id`,
-		u.firstName,
-		u.lastName,
-		u.phone,
-		u.email,
-	).Scan(&userID)
-	if err != nil {
-		panic(err)
+			err = db.QueryRow(
+				`INSERT INTO users (first_name, last_name, phone, email)
+				 VALUES ($1, $2, $3, $4)
+				 RETURNING id`,
+				u.firstName,
+				u.lastName,
+				u.phone,
+				u.email,
+			).Scan(&userID)
+			if err != nil {
+				panic(err)
+			}
+
+			fmt.Println("Your login ID is:", userID)
+			fmt.Println("IMPORTANT: Save your login ID as you will need it to log in!")
+
+		case "2":
+			for {
+				u, id, err := getExistingUser(scanner, db)
+				if err == nil {
+					currentUser = u
+					userID = id
+					break
+				}
+				fmt.Println("Error:", err)
+			}
+
+		case "3":
+			fmt.Println("Goodbye!")
+			return
+
+		default:
+			fmt.Println("Invalid option, please try again.")
+			continue
+		}
+
+		break
 	}
 
 	for {
-		userChoice := mainMenu(scanner)
+		userChoice := appointmentMenu(scanner)
 
 		switch userChoice {
 		case "1":
@@ -728,15 +854,15 @@ func main() {
 			for _, a := range newAppointments {
 				_, err := db.Exec(
 					`INSERT INTO appointments (
-					user_id,
-					pet_name,
-					pet_species,
-					pet_age,
-					pet_weight,
-					vaccinated,
-					appointment_type,
-					vet_name,
-					appointment_time
+						user_id,
+						pet_name,
+						pet_species,
+						pet_age,
+						pet_weight,
+						vaccinated,
+						appointment_type,
+						vet_name,
+						appointment_time
 					) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
 					userID,
 					a.pet.name,
@@ -754,17 +880,24 @@ func main() {
 			}
 
 		case "2":
-			if len(appointments) == 0 {
+			appts, err := getAppointmentsByUserID(db, userID)
+			if err != nil {
+				fmt.Println("Error: ", err)
+				continue
+			}
+
+			if len(appts) == 0 {
 				fmt.Println("No appointments yet.")
 				continue
 			}
 
 			fmt.Println(currentUser.ownerSummaryString())
-			for i, a := range appointments {
+			for i, a := range appts {
 				fmt.Println(a.summaryString(i + 1))
 			}
+
 		case "3":
-			fmt.Println("Thank you for using our booking service!")
+			fmt.Println("Goodbye!")
 			return
 
 		default:
