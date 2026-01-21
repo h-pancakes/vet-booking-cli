@@ -44,6 +44,10 @@ type appointment struct {
 var allowedSpecies = []string{
 	"Dog",
 	"Cat",
+	"Rabbit",
+	"Hamster",
+	"Gecko",
+	"Rat",
 }
 
 // allowedAppointmentTypes is a list that holds the types of appointments available to the user.
@@ -59,7 +63,7 @@ var allowedAppointmentTypes = []string{
 var allowedVets = []string{
 	"Dr Smith",
 	"Dr Jones",
-	"Dr Patel",
+	"Dr Dolittle",
 	"Dr Brown",
 }
 
