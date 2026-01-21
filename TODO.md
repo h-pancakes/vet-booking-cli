@@ -1,7 +1,7 @@
 # To-do list - DEADLINE FEBRUARY
 
 # PRIORITISED IMPROVEMENTS
-- [ ] Rewrite comments and documentation - easy
+- [X] Rewrite comments and documentation - easy
 - [ ] Simplify existing validation and standardise it - medium
 - [ ] Create way to log in using table ID - medium
 - [ ] Refactor SQL sections - hard

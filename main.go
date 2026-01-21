@@ -12,7 +12,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// user holds information about the user of the booking service
+// user is a struct that holds information about the user of the booking service.
+// It contains contact details persisted to the database.
 type user struct {
 	firstName string
 	lastName  string
@@ -20,7 +21,8 @@ type user struct {
 	email     string
 }
 
-// pet holds information about a pet
+// pet is a struct that holds information about a pet that the user is booking an appointment for.
+// This information is stored in the appointments table in the database.
 type pet struct {
 	name       string
 	species    string
@@ -29,26 +31,22 @@ type pet struct {
 	vaccinated bool
 }
 
-// appointment holds all information related to an appointment
+// appointment is a struct that holds all information related to an appointment booked by the user.
+// This information is stored in the appointments table in the database.
 type appointment struct {
 	appointmentType string
 	pet             pet
-	vet             vet
+	vet             string
 	dateTime        time.Time
 }
 
-// vet holds information about vets
-type vet struct {
-	name string
-}
-
-// allowedSpecies holds the species options available to the user
+// allowedSpecies is a list that holds the options for choosing the pet's species for the appointment.
 var allowedSpecies = []string{
 	"Dog",
 	"Cat",
 }
 
-// allowedAppointmentTypes holds the appointment type options available
+// allowedAppointmentTypes is a list that holds the types of appointments available to the user.
 var allowedAppointmentTypes = []string{
 	"Grooming",
 	"Vaccination",
@@ -57,7 +55,7 @@ var allowedAppointmentTypes = []string{
 	"Dental",
 }
 
-// allowedVets holds the veterinarians available to the user
+// allowedVets is a list that holds the veterinarians that are available to the user.
 var allowedVets = []string{
 	"Dr Smith",
 	"Dr Jones",
@@ -65,7 +63,10 @@ var allowedVets = []string{
 	"Dr Brown",
 }
 
-// getUserFirstName prompts the user for their first name and validates it
+// getUserFirstName is a helper function that prompts the user for their first name and then stores it.
+// The stored name is then normalised by removing unnecessary whitespace.
+// The name is passed through multiple validation checks and returned, if it passes all checks.
+// If validation fails, an error is returned.
 func getUserFirstName(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -105,7 +106,10 @@ func getUserFirstName(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
-// getUserLastName prompts the user for their surname and validates it
+// getUserLastName is a helper function that prompts the user for their first name and then stores it.
+// The stored name is then normalised by removing unnecessary whitespace.
+// The name is passed through multiple validation checks and is returned if it passes all checks.
+// If validation fails, an error is returned.
 func getUserLastName(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -144,7 +148,10 @@ func getUserLastName(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
-// getUserPhone prompts the user for their telephone number and validates it
+// getUserPhone is a helper function that prompts the user for their phone number and stores it.
+// The stored number is normalised by removing unnecessary whitespace.
+// The number is passed through multiple validation checks and is returned if it passes all checks.
+// If validation fails, an error is returned.
 func getUserPhone(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -175,7 +182,10 @@ func getUserPhone(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
-// getUserEmail prompts the user for their email address and validates it
+// getUserEmail is a helper function that prompts the user for their email address and stores it.
+// The stored email address is normalised by removing unnecessary whitespace.
+// The email address is passed through multiple validation checks and is returned if it passes all checks.
+// If validation fails, an error is returned.
 func getUserEmail(scanner *bufio.Scanner) (string, error) {
 	var input string
 
@@ -261,7 +271,10 @@ func getUserEmail(scanner *bufio.Scanner) (string, error) {
 	return input, nil
 }
 
-// gatherUserInfo collects validated inputs for user and creates a user object
+// gatherUserInfo calls the helper functions repeatedly until a valid input is received from the user for all fields.
+// If an error is received for a helper function, gatherUserInfo calls the function again, and the user is prompted for a valid input.
+// If a valid input is received for a helper function, gatherUserInfo will pass the valid input to the corresponding field in the newly initialised "user" object.
+// Once all fields in "user" are filled, gatherUserInfo returns the "user" object.
 func gatherUserInfo(scanner *bufio.Scanner) user {
 	var user user
 
@@ -302,7 +315,8 @@ func gatherUserInfo(scanner *bufio.Scanner) user {
 	return user
 }
 
-// mainMenu presents the user with a menu after they log their personal details
+// mainMenu is a function displays a menu screen to the user with 3 options.
+// The option that the user selects is normalised and then passed to main().
 func mainMenu(scanner *bufio.Scanner) string {
 	fmt.Println("1. Create new appointment")
 	fmt.Println("2. View appointments")
@@ -313,7 +327,9 @@ func mainMenu(scanner *bufio.Scanner) string {
 	return strings.TrimSpace(scanner.Text())
 }
 
-// petCounter prompts the user to enter the number of pets they wish to book an appointment for
+// petCounter is a function that prompts the user to enter the number of pets they wish to book an appointment for.
+// The input is converted into an integer type and then validated.
+// If the input is invalid, an error is returned.
 func petCounter(scanner *bufio.Scanner) (int, error) {
 	var petCount int
 
@@ -330,7 +346,10 @@ func petCounter(scanner *bufio.Scanner) (int, error) {
 	}
 }
 
-// getName prompts the user for a pet's name and validates it
+// getName is a helper function that prompts the user for their pet's name and stores it.
+// The stored name is normalised by removing unnecessary whitespace.
+// The name is passed through multiple validation checks and is returned if it passes all checks.
+// If validation fails, an error is returned.
 func getName(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
@@ -369,7 +388,9 @@ func getName(scanner *bufio.Scanner, i int) (string, error) {
 	return input, nil
 }
 
-// getSpecies asks for a pet's species and ensures it matches an allowed option
+// getSpecies is a helper function that prompts the user to provide their pet's species and lists available options using the "allowedSpecies" list.
+// The input is stored and normalised.
+// If the input is not listed in "allowedSpecies", the user is prompted again.
 func getSpecies(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
@@ -397,7 +418,10 @@ func getSpecies(scanner *bufio.Scanner, i int) (string, error) {
 	return input, nil
 }
 
-// getAge prompts the user for a pet's age and validates the range
+// getAge is a helper function that prompts the user for their pet's age and stores it.
+// The stored age is converted to an integer type.
+// The name is passed through a validation check.
+// If validation fails, an error is returned.
 func getAge(scanner *bufio.Scanner, i int) (int, error) {
 	var input int
 
@@ -411,7 +435,10 @@ func getAge(scanner *bufio.Scanner, i int) (int, error) {
 	return input, nil
 }
 
-// getWeightKg prompts for the pet's weight in kilograms and validates the range
+// getWeightKg is a helper function that prompts the user for their pet's weight in kilograms and stores it.
+// The stored weight is converted to a float64 type.
+// The weight is passed through a validation check.
+// If validation fails, an error is returned.
 func getWeightKg(scanner *bufio.Scanner, i int) (float64, error) {
 	var input float64
 
@@ -425,7 +452,9 @@ func getWeightKg(scanner *bufio.Scanner, i int) (float64, error) {
 	return input, nil
 }
 
-// getVaccinationStatus prompts for and validates the pet's vaccination status
+// getVaccinationStatus is a helper function that prompts the user to clarify whether their pet is vaccinated or not.
+// The function takes the user input in the form of a (y/n) and stores it in an input variable.
+// The variable is passed through a switch statement that either stores a boolean value or returns an error in the case of an invalid input.
 func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 	var input string
 
@@ -443,7 +472,9 @@ func getVaccinationStatus(scanner *bufio.Scanner, i int) (bool, error) {
 	}
 }
 
-// getAppointmentType displays available appointment types and ensures the user picks an accepted type
+// getAppointmentType is a helper function that prompts the user to choose an appointment type and lists available options using the "allowedAppointmentTypes" list.
+// The input is stored and normalised.
+// If the input is not listed in "allowedAppointmentTypes", the user is prompted again.
 func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
@@ -471,8 +502,10 @@ func getAppointmentType(scanner *bufio.Scanner, i int) (string, error) {
 	return input, nil
 }
 
-// getVet displays available vets and ensures the user chooses a preferred vet
-func getVet(scanner *bufio.Scanner, i int) (vet, error) {
+// getVet is a helper function that prompts the user to choose a preferred vet for their appointment and lists available options using the "allowedVets" list.
+// The input is stored and normalised.
+// If the input is not listed in "allowedAppointmentTypes", the user is prompted again.
+func getVet(scanner *bufio.Scanner, i int) (string, error) {
 	var input string
 
 	fmt.Println("Please choose preferred vet for appointment", i+1)
@@ -483,14 +516,18 @@ func getVet(scanner *bufio.Scanner, i int) (vet, error) {
 
 	for _, v := range allowedVets {
 		if v == input {
-			return vet{name: v}, nil
+			return v, nil
 		}
 	}
 
-	return vet{}, fmt.Errorf("please choose a valid vet")
+	return "", fmt.Errorf("please choose a valid vet")
 }
 
-// getPreferredDateTime allows the user to enter a preferred time for their appointment
+// getPreferredDateTime is a helper function that allows the user to enter a preferred date and time for their appointment.
+// The user is prompted for a date and time in a specified format.
+// The input is stored and normalised.
+// The input is parsed and converted into a date and time format.
+// The input is then validated and an error is displayed if it doesn't pass the validation checks.
 func getPreferredDateTime(scanner *bufio.Scanner, i int) (time.Time, error) {
 	fmt.Println("Please enter preferred date and time for appointment", i+1)
 	fmt.Println("Format: YYYY-MM-DD HH:MM (24-hour time)")
@@ -512,7 +549,11 @@ func getPreferredDateTime(scanner *bufio.Scanner, i int) (time.Time, error) {
 	return t, nil
 }
 
-// bookAppointment collects validated input for each pet and returns a slice of pets
+// bookAppointments calls the helper functions repeatedly until a valid input is received from the user for all fields. This procedure is iterated for each appointment the user filled in details for.
+// If an error is received for a helper function, bookAppointments calls the function again, and the user is prompted for a valid input.
+// If a valid input is received for a helper function, bookAppointments will pass the valid input to the corresponding field in the newly initialised "appointment" objects.
+// The appointment objects are stored in a list to accommodate multiple appointments.
+// Once all fields in "appointment" are filled, bookAppointments returns the list of "appointment" objects.
 func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
 	appointments := make([]appointment, 0, petCount)
 
@@ -601,7 +642,7 @@ func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
 	return appointments
 }
 
-// summaryString prints a summary of the pet and appointment details
+// summaryString prints a summary of each appointment's details.
 func (a *appointment) summaryString(i int) string {
 	var s string
 	s = "-------------------------------------\n"
@@ -612,14 +653,14 @@ func (a *appointment) summaryString(i int) string {
 	s += fmt.Sprintf("Weight (kg): %.2f\n", a.pet.weightKg)
 	s += fmt.Sprintf("Vaccinated?: %t\n", a.pet.vaccinated)
 	s += fmt.Sprintf("Appointment Type: %s\n", a.appointmentType)
-	s += fmt.Sprintf("Vet: %s\n", a.vet.name)
+	s += fmt.Sprintf("Vet: %s\n", a.vet)
 	s += fmt.Sprintf("Appointment Date & Time: %s\n", a.dateTime.Format("Monday, 02 Jan 2006 at 15:04"))
 	s += "-------------------------------------\n"
 
 	return s
 }
 
-// ownerSummaryString prints a summary of the user's details
+// ownerSummaryString prints a summary of the user's details.
 func (u *user) ownerSummaryString() string {
 	var s string
 	s = "-------------------------------------\n"
@@ -704,7 +745,7 @@ func main() {
 					a.pet.weightKg,
 					a.pet.vaccinated,
 					a.appointmentType,
-					a.vet.name,
+					a.vet,
 					a.dateTime,
 				)
 				if err != nil {
