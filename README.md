@@ -16,20 +16,19 @@ Users can log in, create and view appointments stored in a PostgreSQL database.
 
 3. Run the schema: psql vet_booking < schema.sql
 
-4. Set database connection:
+4. Create a .env file in the project root directory using .env.example as a template:
+- cp .env.example .env (Linux/MacOS)
+- Copy-Item .env.example .env (Windows)
 
-MacOS/Linux:
-    export DATABASE_URL="postgres://username:password@localhost:5432/vet_booking?sslmode=disable"
+5. Edit .env and replace username and password with YOUR PostgreSQL credentials:
+DATABASE_URL=postgres://username:password@localhost:5432/vet_booking?sslmode=disable
+ 
 
-Windows Powershell:
-    $env:DATABASE_URL="postgres://username:password@localhost:5432/vet_booking?sslmode=disable"
+6. Change directory to project root
 
-REPLACE username AND password WITH YOUR PostgreSQL CREDENTIALS
-
-5. Change directory to project root directory
-
-6. Run the program with: go run .
+7. Run with:
+go run .
 
 # Notes
 
-Look at TODO.md for upcoming features and changes!
+Check out TODO.md for upcoming features!
