@@ -10,11 +10,14 @@ Users can log in, create and view appointments stored in a PostgreSQL database.
 
 # Setup
 
-1. Create a PostgreSQL database e.g. vet_booking
+1. Create a PostgreSQL database:
+CREATE DATABASE vet_booking;
 
-2. Connect to the database: \c vet_booking
+2. Connect to the database:
+\c vet_booking
 
-3. Run the schema: psql vet_booking < schema.sql
+3. Run the schema:
+psql vet_booking < schema.sql
 
 4. Create a .env file in the project root directory using .env.example as a template:
 - cp .env.example .env (Linux/MacOS)
@@ -22,11 +25,10 @@ Users can log in, create and view appointments stored in a PostgreSQL database.
 
 5. Edit .env and replace username and password with YOUR PostgreSQL credentials:
 DATABASE_URL=postgres://username:password@localhost:5432/vet_booking?sslmode=disable
- 
 
 6. Change directory to project root
 
-7. Run with:
+7. Run program:
 go run .
 
 # Notes
