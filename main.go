@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -778,6 +779,7 @@ func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 
+	_ = godotenv.Load()
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
 		fmt.Println("DATABASE_URL environment variable not set")
