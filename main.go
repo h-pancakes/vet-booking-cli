@@ -117,6 +117,8 @@ func getExistingUser(scanner *bufio.Scanner, db *sql.DB) (*user, int, error) {
 		return nil, 0, err
 	}
 
+	fmt.Println("Welcome,", u.firstName)
+
 	return &u, id, nil
 }
 
