@@ -1,10 +1,7 @@
 # To-do list
 
-- [X] Rewrite comments and documentation - easy
-- [X] Simplify existing validation and standardise it - medium
-- [X] Create way to log in using table ID - medium
-- [X] Refactor SQL sections - hard
-- [ ] Replace panics with error handling - easy
-- [ ] Add a way for users to cancel appointments - hard
-- [ ] Split code into separate files - hard
-- [ ] Write tests - v.hard
+ - [ ] Replace panics with real error handling 
+ - [ ] Add a way for users to UPDATE and DELETE appointments
+ - [ ] Split code into separate files 
+ - [ ] Prevent appointment clashing and display available options
+ - [ ] Write tests 
