@@ -4,7 +4,7 @@ CREATE TABLE users (
     last_name TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT NOT NULL,
-    CONSTRAINT users_email_unique_ci UNIQUE (LOWER(email))
+    CONSTRAINT users_email_unique_ci UNIQUE (email)
 );
 
 CREATE TABLE appointments (

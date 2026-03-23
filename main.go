@@ -309,6 +309,8 @@ func getUserEmail(scanner *bufio.Scanner) (string, error) {
 
 	input = strings.ReplaceAll(input, " ", "")
 
+	input = strings.ToLower(input)
+
 	if len(input) < 5 {
 		return "", fmt.Errorf("minimum email length is 5 characters")
 	}
