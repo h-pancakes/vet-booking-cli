@@ -1,6 +1,6 @@
 # vet-booking-cli
 
-A command line simple veterinary appointment booking system written in Go.
+A simple CLI veterinary appointment booking system written in Go.
 Users can log in, create and view appointments stored in a PostgreSQL database.
 
 # Requirements
@@ -17,7 +17,8 @@ CREATE DATABASE vet_booking;
 \c vet_booking
 
 3. Run the schema:
-psql vet_booking < schema.sql
+ - psql vet_booking < schema.sql (Powershell)
+ - \i schema.sql (Bash - make sure current directory is project root directory beforehand)
 
 4. Create a .env file in the project root directory using .env.example as a template:
 - cp .env.example .env (Linux/MacOS)
