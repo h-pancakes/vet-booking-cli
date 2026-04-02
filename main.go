@@ -792,7 +792,8 @@ func main() {
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error connecting to database:", err)
+		return
 	}
 	defer db.Close()
 
@@ -814,7 +815,8 @@ func main() {
 				u.email,
 			).Scan(&userID)
 			if err != nil {
-				panic(err)
+				fmt.Println("Error saving user to database:", err)
+				return
 			}
 
 			fmt.Println("Your login ID is:", userID)
@@ -885,7 +887,8 @@ func main() {
 					a.dateTime,
 				)
 				if err != nil {
-					panic(err)
+					fmt.Println("Error saving appointment to database:", err)
+					return
 				}
 			}
 
