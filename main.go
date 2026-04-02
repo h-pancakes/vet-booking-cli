@@ -744,6 +744,13 @@ func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
 	return appointments
 }
 
+func removeAppointment() {
+	// NEED TO MAKE LIST OF APPOINTMENTS
+	fmt.Println("Enter appointment ID: ")
+	// var appointment appointment
+
+}
+
 // summaryString prints a summary of each appointment's details.
 func (a *appointment) summaryString(i int) string {
 	var s string
