@@ -8,3 +8,4 @@
  - [ ] Create pipeline / containerise application
  - [ ] Convert to REST API
  - [ ] Add user login passwords
+ - [ ] Improve program flow by adding options to move back between menus and abort actions
