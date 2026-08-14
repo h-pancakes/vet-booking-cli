@@ -7,3 +7,4 @@
  - [ ] Write unit tests
  - [ ] Create pipeline / containerise application
  - [ ] Convert to REST API
+ - [ ] Add user login passwords
