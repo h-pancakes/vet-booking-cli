@@ -68,7 +68,7 @@ var allowedVets = []string{
 	"Dr Brown",
 }
 
-// mainMenu is a function displays a menu screen to the user with 3 options.
+// mainMenu is a function that displays a menu screen to the user with 3 options.
 // The option that the user selects is normalised and then passed to main().
 func mainMenu(scanner *bufio.Scanner) string {
 	fmt.Println("1. New user")
@@ -82,7 +82,7 @@ func mainMenu(scanner *bufio.Scanner) string {
 
 // getExistingUser is a special function that is called when the user selects option "2" in the main menu to indicate they are an existing user.
 // The function prompts the user to enter their login ID to access their appointments saved on the database.
-// The user's input is normalised, and subsequently validated and the database is queried for a row with a matching ID.
+// The user's input is normalised, then subsequently validated, and the database is queried for a row with a matching ID.
 // If there is a matching ID, that row's contents are fetched and placed in memory.
 func getExistingUser(scanner *bufio.Scanner, db *sql.DB) (*user, int, error) {
 	fmt.Println("Please enter your login ID:")
@@ -435,7 +435,8 @@ func gatherUserInfo(scanner *bufio.Scanner) user {
 func appointmentMenu(scanner *bufio.Scanner) string {
 	fmt.Println("1. Create new appointment")
 	fmt.Println("2. View existing appointments")
-	fmt.Println("3. Exit")
+	fmt.Println("3. Delete an appointment")
+	fmt.Println("4. Exit")
 	fmt.Print("> ")
 
 	scanner.Scan()
@@ -744,11 +745,30 @@ func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
 	return appointments
 }
 
-func removeAppointment() {
-	// NEED TO MAKE LIST OF APPOINTMENTS
+func deleteAppointment(scanner *bufio.Scanner, db *sql.DB) error {
 	fmt.Println("Enter appointment ID: ")
-	// var appointment appointment
+	fmt.Print(">")
 
+	scanner.Scan()
+	input := strings.TrimSpace(scanner.Text())
+
+	id, err := strconv.Atoi(input)
+	if err != nil {
+		return fmt.Errorf("Invalid ID: %v", err)
+	}
+
+	result, err := db.Exec("DELETE FROM appointments WHERE id = $1", id)
+	if err != nil {
+		return fmt.Errorf("Database error: %v:", err)
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf("No appointment found with ID %d", id)
+	}
+
+	fmt.Printf("Appointment %d deleted successfully\n", id)
+	return nil
 }
 
 // summaryString prints a summary of each appointment's details.
@@ -917,6 +937,26 @@ func main() {
 			}
 
 		case "3":
+			appts, err := getAppointmentsByUserID(db, userID)
+			if err != nil {
+				fmt.Println("Error: ", err)
+				continue
+			}
+
+			if len(appts) == 0 {
+				fmt.Println("No appointments to delete.")
+				continue
+			}
+
+			for i, a := range appts {
+				fmt.Println(a.summaryString(i + 1))
+			}
+
+			if err := deleteAppointment(scanner, db); err != nil {
+				fmt.Println("Error:", err)
+			}
+
+		case "4":
 			fmt.Println("Goodbye!")
 			return
 
