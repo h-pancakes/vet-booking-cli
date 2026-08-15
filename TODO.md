@@ -1,9 +1,9 @@
 # To-do list
 
- - [x] Replace panics with real error handling 
+ - [ ] Add structured error codes
  - [ ] Add a way for users to UPDATE appointments
  - [x] Add a way for users to DELETE appointments
- - [ ] Split code into separate files 
+ - [ ] Split code into separate files and refactor main 
  - [ ] Prevent appointment clashing (code and database) and display available options
  - [ ] Write unit tests
  - [ ] Create pipeline / containerise application
