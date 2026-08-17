@@ -24,6 +24,7 @@ type pet struct {
 // appointment is a struct that holds all information related to an appointment booked by the user.
 // This information is stored in the appointments table in the database.
 type appointment struct {
+	id              string
 	appointmentType string
 	pet             pet
 	vet             string

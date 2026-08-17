@@ -100,6 +100,7 @@ func getExistingUser(scanner *bufio.Scanner, db *sql.DB) (*user, int, error) {
 func getAppointmentsByUserID(db *sql.DB, userID int) ([]appointment, error) {
 	rows, err := db.Query(
 		`SELECT
+			id,
 			pet_name,
 			pet_species,
 			pet_age,
@@ -124,6 +125,7 @@ func getAppointmentsByUserID(db *sql.DB, userID int) ([]appointment, error) {
 		var p pet
 
 		err := rows.Scan(
+			&a.id,
 			&p.name,
 			&p.species,
 			&p.age,
@@ -718,7 +720,7 @@ func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
 }
 
 func deleteAppointment(scanner *bufio.Scanner, db *sql.DB) error {
-	fmt.Println("Enter appointment ID: ")
+	fmt.Println("Enter appointment ID to delete: ")
 	fmt.Print(">")
 
 	scanner.Scan()
@@ -748,6 +750,7 @@ func (a *appointment) summaryString(i int) string {
 	var s string
 	s = "-------------------------------------\n"
 	s += fmt.Sprintf("Appointment %d information:\n", i)
+	s += fmt.Sprintf("ID: %s\n", a.id)
 	s += fmt.Sprintf("Pet Name: %s\n", a.pet.name)
 	s += fmt.Sprintf("Species: %s\n", a.pet.species)
 	s += fmt.Sprintf("Age: %d\n", a.pet.age)
