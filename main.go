@@ -715,6 +715,7 @@ func getAppointment(scanner *bufio.Scanner, petCount int) []appointment {
 	return appointments
 }
 
+// TODO: change to prevent user from deleting appointments that don't belong to them
 func deleteAppointment(scanner *bufio.Scanner, db *sql.DB) error {
 	fmt.Println("Enter appointment ID to delete: ")
 	fmt.Print(">")
