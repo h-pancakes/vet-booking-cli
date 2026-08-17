@@ -457,10 +457,10 @@ func appointmentMenu(scanner *bufio.Scanner) string {
 	return strings.TrimSpace(scanner.Text())
 }
 
-// petCounter is a function that prompts the user to enter the number of pets they wish to book an appointment for.
+// getNumberofPets is a function that prompts the user to enter the number of pets they wish to book an appointment for.
 // The input is converted into an integer type and then validated.
 // If the input is invalid, an error is returned.
-func petCounter(scanner *bufio.Scanner) (int, error) {
+func getNumberofPets(scanner *bufio.Scanner) (int, error) {
 	var petCount int
 
 	fmt.Println("Please enter how many pets you are booking appointments for: ")
@@ -622,12 +622,12 @@ func getPreferredDateTime(scanner *bufio.Scanner, i int) (time.Time, error) {
 	return t, nil
 }
 
-// bookAppointments calls the helper functions repeatedly until a valid input is received from the user for all fields. This procedure is iterated for each appointment the user filled in details for.
-// If an error is received for a helper function, bookAppointments calls the function again, and the user is prompted for a valid input.
-// If a valid input is received for a helper function, bookAppointments will pass the valid input to the corresponding field in the newly initialised "appointment" objects.
+// getAppointment calls the helper functions repeatedly until a valid input is received from the user for all fields. This procedure is iterated for each appointment the user filled in details for.
+// If an error is received for a helper function, getAppointment calls the function again, and the user is prompted for a valid input.
+// If a valid input is received for a helper function, getAppointment will pass the valid input to the corresponding field in the newly initialised "appointment" objects.
 // The appointment objects are stored in a list to accommodate multiple appointments.
-// Once all fields in "appointment" are filled, bookAppointments returns the list of "appointment" objects.
-func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
+// Once all fields in "appointment" are filled, getAppointment returns the list of "appointment" objects.
+func getAppointment(scanner *bufio.Scanner, petCount int) []appointment {
 	appointments := make([]appointment, 0, petCount)
 
 	for i := 0; i < petCount; i++ {
@@ -760,8 +760,8 @@ func (a *appointment) summaryString(i int) string {
 	return s
 }
 
-// ownerSummaryString prints a summary of the user's details.
-func (u *user) ownerSummaryString() string {
+// String prints a summary of the user's details.
+func (u user) String() string {
 	var s string
 	s = "-------------------------------------\n"
 	s += "Owner details:\n"
@@ -795,6 +795,7 @@ func main() {
 	}
 	defer db.Close()
 
+	// TODO: extract the following for into a function
 	for {
 		choice := getMainMenuChoice(scanner)
 
@@ -803,6 +804,7 @@ func main() {
 			for {
 				u := gatherUserInfo(scanner)
 				userCreated := createNewUser(u, db)
+				// TODO: change signature of createNewUser
 				if userCreated {
 					break
 				}
@@ -810,6 +812,7 @@ func main() {
 
 		case "2":
 			for {
+				// TODO: refactor getExistingUser to separate the user ID received from the user and the retrieval of the user from the database
 				u, id, err := getExistingUser(scanner, db)
 				if err == nil {
 					currentUser = u
@@ -831,6 +834,7 @@ func main() {
 		break
 	}
 
+	// TODO: refactor this for into its own function
 	for {
 		userChoice := appointmentMenu(scanner)
 
@@ -838,17 +842,18 @@ func main() {
 		case "1":
 			var petCount int
 			for {
-				count, err := petCounter(scanner)
+				numberOfPets, err := getNumberofPets(scanner)
 				if err == nil {
-					petCount = count
+					petCount = numberOfPets
 					break
 				}
 				fmt.Println("Error:", err)
 			}
 
-			newAppointments := bookAppointments(scanner, petCount)
-			appointments = append(appointments, newAppointments...)
+			// TODO: remove petCount. 1 pet, 1 appointment!
+			newAppointments := getAppointment(scanner, petCount)
 
+			// TODO: add appointment to db should be its own function
 			for _, a := range newAppointments {
 				_, err := db.Exec(
 					`INSERT INTO appointments (
@@ -877,6 +882,7 @@ func main() {
 					return
 				}
 			}
+			appointments = append(appointments, newAppointments...)
 
 		case "2":
 			appts, err := getAppointmentsByUserID(db, userID)
@@ -890,7 +896,7 @@ func main() {
 				continue
 			}
 
-			fmt.Println(currentUser.ownerSummaryString())
+			fmt.Println(currentUser)
 			for i, a := range appts {
 				fmt.Println(a.summaryString(i + 1))
 			}
