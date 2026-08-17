@@ -40,9 +40,9 @@ var allowedVets = []string{
 	"Dr Brown",
 }
 
-// mainMenu is a function that displays a menu screen to the user with 3 options.
+// getMainMenuChoice is a function that displays a menu screen to the user with 3 options.
 // The option that the user selects is normalised and then passed to main().
-func mainMenu(scanner *bufio.Scanner) string {
+func getMainMenuChoice(scanner *bufio.Scanner) string {
 	fmt.Println("1. New user")
 	fmt.Println("2. Existing user")
 	fmt.Println("3. Exit")
@@ -146,6 +146,46 @@ func getAppointmentsByUserID(db *sql.DB, userID int) ([]appointment, error) {
 	return appointments, nil
 }
 
+func getName(scanner *bufio.Scanner, prompt string) (string, error) {
+	var input string
+
+	fmt.Println(prompt)
+	scanner.Scan()
+
+	input = scanner.Text()
+
+	input = strings.TrimSpace(input)
+
+	trimmedInput := strings.ReplaceAll(input, " ", "")
+
+	if len(trimmedInput) < 1 {
+		return "", fmt.Errorf("name must be at least 1 character")
+	}
+
+	if len(trimmedInput) > 20 {
+		return "", fmt.Errorf("character limit is 20 characters")
+	}
+
+	for _, c := range input {
+		if c >= 'A' && c <= 'Z' {
+			continue
+		}
+		if c >= 'a' && c <= 'z' {
+			continue
+		}
+		if c == ' ' {
+			continue
+		}
+		if c == '-' {
+			continue
+		}
+		return "", fmt.Errorf("name can only contain A-Z, hyphens, and spaces")
+	}
+	// TODO: Change this to use supported method
+	input = strings.Title(input)
+	return input, nil
+}
+
 // getUserFirstName is a helper function that prompts the user for their first name and then stores it.
 // The stored name is then normalised by removing unnecessary whitespace.
 // The name is passed through multiple validation checks and returned, if it passes all checks.
@@ -153,7 +193,6 @@ func getAppointmentsByUserID(db *sql.DB, userID int) ([]appointment, error) {
 func getUserFirstName(scanner *bufio.Scanner) (string, error) {
 	var input string
 
-	fmt.Println("Welcome to our booking service!")
 	fmt.Println("Please enter your first name: ")
 	scanner.Scan()
 
@@ -186,7 +225,7 @@ func getUserFirstName(scanner *bufio.Scanner) (string, error) {
 		}
 		return "", fmt.Errorf("name can only contain A-Z, hyphens, and spaces")
 	}
-
+	// TODO: Change this to use supported method
 	input = strings.Title(input)
 	return input, nil
 }
@@ -366,9 +405,10 @@ func getUserEmail(scanner *bufio.Scanner) (string, error) {
 // Once all fields in "user" are filled, gatherUserInfo returns the "user" object.
 func gatherUserInfo(scanner *bufio.Scanner) user {
 	var user user
+	fmt.Println("Please enter your user information")
 
 	for {
-		firstName, err := getUserFirstName(scanner)
+		firstName, err := getName(scanner, "Please type in your first name: ")
 		if err == nil {
 			user.firstName = firstName
 			break
@@ -376,7 +416,7 @@ func gatherUserInfo(scanner *bufio.Scanner) user {
 		fmt.Println("Error: ", err)
 	}
 	for {
-		lastName, err := getUserLastName(scanner)
+		lastName, err := getName(scanner, "Please type in your last name: ")
 		if err == nil {
 			user.lastName = lastName
 			break
@@ -434,50 +474,6 @@ func petCounter(scanner *bufio.Scanner) (int, error) {
 	} else {
 		return 0, fmt.Errorf("input must have value between 0 and 20")
 	}
-}
-
-// getName is a helper function that prompts the user for their pet's name and stores it.
-// The stored name is normalised by removing unnecessary whitespace.
-// The name is passed through multiple validation checks and is returned if it passes all checks.
-// If validation fails, an error is returned.
-func getName(scanner *bufio.Scanner, i int) (string, error) {
-	var input string
-
-	fmt.Println("Please enter pet", i+1, "name: ")
-	scanner.Scan()
-
-	input = scanner.Text()
-
-	input = strings.TrimSpace(input)
-
-	trimmedInput := strings.ReplaceAll(input, " ", "")
-
-	if len(trimmedInput) < 1 {
-		return "", fmt.Errorf("name must be at least 1 character")
-	}
-
-	if len(trimmedInput) > 20 {
-		return "", fmt.Errorf("character limit is 20 characters")
-	}
-
-	for _, c := range input {
-		if c >= 'A' && c <= 'Z' {
-			continue
-		}
-		if c >= 'a' && c <= 'z' {
-			continue
-		}
-		if c == ' ' {
-			continue
-		}
-		if c == '-' {
-			continue
-		}
-		return "", fmt.Errorf("name can only contain characters A-Z and spaces")
-	}
-
-	input = strings.Title(input)
-	return input, nil
 }
 
 // getSpecies is a helper function that prompts the user to provide their pet's species and lists available options using the "allowedSpecies" list.
@@ -639,7 +635,7 @@ func bookAppointments(scanner *bufio.Scanner, petCount int) []appointment {
 		var d pet
 
 		for {
-			name, err := getName(scanner, i)
+			name, err := getName(scanner, "Please enter pet "+strconv.Itoa(i+1)+" name")
 			if err == nil {
 				d.name = name
 				break
@@ -800,29 +796,17 @@ func main() {
 	defer db.Close()
 
 	for {
-		choice := mainMenu(scanner)
+		choice := getMainMenuChoice(scanner)
 
 		switch choice {
 		case "1":
-			u := gatherUserInfo(scanner)
-			currentUser = &u
-
-			err = db.QueryRow(
-				`INSERT INTO users (first_name, last_name, phone, email)
-				 VALUES ($1, $2, $3, $4)
-				 RETURNING id`,
-				u.firstName,
-				u.lastName,
-				u.phone,
-				u.email,
-			).Scan(&userID)
-			if err != nil {
-				fmt.Println("Error saving user to database:", err)
-				return
+			for {
+				u := gatherUserInfo(scanner)
+				userCreated := createNewUser(u, db)
+				if userCreated {
+					break
+				}
 			}
-
-			fmt.Println("Your login ID is:", userID)
-			fmt.Println("IMPORTANT: Save your login ID as you will need it to log in!")
 
 		case "2":
 			for {
@@ -939,4 +923,26 @@ func main() {
 			fmt.Println("Invalid option, please try again.")
 		}
 	}
+}
+
+func createNewUser(userToCreate user, db *sql.DB) bool {
+	var err error
+	var createdUserID int
+	err = db.QueryRow(
+		`INSERT INTO users (first_name, last_name, phone, email)
+				 VALUES ($1, $2, $3, $4)
+				 RETURNING id`,
+		userToCreate.firstName,
+		userToCreate.lastName,
+		userToCreate.phone,
+		userToCreate.email,
+	).Scan(&createdUserID)
+	if err != nil {
+		fmt.Println("Error saving user to database:", err)
+		return false
+	}
+
+	fmt.Println("Your login ID is:", createdUserID)
+	fmt.Println("IMPORTANT: Save your login ID as you will need it to log in!")
+	return true
 }
