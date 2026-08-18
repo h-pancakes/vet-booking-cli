@@ -775,6 +775,28 @@ func (u user) String() string {
 	return s
 }
 
+func createNewUser(userToCreate user, db *sql.DB) bool {
+	var err error
+	var createdUserID int
+	err = db.QueryRow(
+		`INSERT INTO users (first_name, last_name, phone, email)
+				 VALUES ($1, $2, $3, $4)
+				 RETURNING id`,
+		userToCreate.firstName,
+		userToCreate.lastName,
+		userToCreate.phone,
+		userToCreate.email,
+	).Scan(&createdUserID)
+	if err != nil {
+		fmt.Println("Error saving user to database:", err)
+		return false
+	}
+
+	fmt.Println("Your login ID is:", createdUserID)
+	fmt.Println("IMPORTANT: Save your login ID as you will need it to log in!")
+	return true
+}
+
 func main() {
 	var currentUser *user
 	var appointments []appointment
@@ -930,26 +952,4 @@ func main() {
 			fmt.Println("Invalid option, please try again.")
 		}
 	}
-}
-
-func createNewUser(userToCreate user, db *sql.DB) bool {
-	var err error
-	var createdUserID int
-	err = db.QueryRow(
-		`INSERT INTO users (first_name, last_name, phone, email)
-				 VALUES ($1, $2, $3, $4)
-				 RETURNING id`,
-		userToCreate.firstName,
-		userToCreate.lastName,
-		userToCreate.phone,
-		userToCreate.email,
-	).Scan(&createdUserID)
-	if err != nil {
-		fmt.Println("Error saving user to database:", err)
-		return false
-	}
-
-	fmt.Println("Your login ID is:", createdUserID)
-	fmt.Println("IMPORTANT: Save your login ID as you will need it to log in!")
-	return true
 }
