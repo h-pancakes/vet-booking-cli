@@ -1,12 +1,12 @@
 # To-do list
 
- - [ ] Add structured error codes
+ - [ ] Add structured and consistent error codes - utilise err?
  - [ ] Add a way for users to UPDATE appointments
  - [x] Add a way for users to DELETE appointments
- - [ ] Split code into separate files and refactor main 
- - [ ] Prevent appointment clashing (code and database) and display available options
- - [ ] Write unit tests
- - [ ] Create pipeline / containerise application
- - [ ] Convert to REST API
- - [ ] Add user login passwords
- - [ ] Improve program flow by adding options to move back between menus and abort actions
+ - [ ] Split code into separate files and refactor main - cleaning up
+ - [ ] Prevent appointment clashing - priority is on the database level
+ - [ ] Write unit tests - utilise Go's features!
+ - [ ] Create pipeline / containerise application - Podman and Azure DevOps?
+ - [ ] Convert to REST API - ideally used Go built in tools
+ - [ ] Add user login passwords - hashing etc.
+ - [ ] Improve program flow by adding options to move back between menus and abort actions - QoL
