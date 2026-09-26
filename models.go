@@ -5,6 +5,7 @@ import "time"
 // user is a struct that holds information about the user of the booking service.
 // It contains contact details persisted to the database.
 type user struct {
+	id        string
 	firstName string
 	lastName  string
 	phone     string
