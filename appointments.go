@@ -101,9 +101,9 @@ func getName(scanner *bufio.Scanner, prompt string) (string, error) {
 	return input, nil
 }
 
-// appointmentMenu is a function displays a menu screen to the user with 3 options.
+// getAppointmentMenuChoice is a function displays a menu screen to the user with 3 options.
 // The option that the user selects is normalised and then passed to main().
-func appointmentMenu(scanner *bufio.Scanner) string {
+func getAppointmentMenuChoice(scanner *bufio.Scanner) string {
 	fmt.Println("1. Create new appointment")
 	fmt.Println("2. View existing appointments")
 	fmt.Println("3. Delete an appointment")
@@ -279,13 +279,12 @@ func getPreferredDateTime(scanner *bufio.Scanner) (time.Time, error) {
 	return t, nil
 }
 
-// getAppointment calls the helper functions repeatedly until a valid input is received from the user for all fields. This procedure is iterated for each appointment the user filled in details for.
-// If an error is received for a helper function, getAppointment calls the function again, and the user is prompted for a valid input.
-// If a valid input is received for a helper function, getAppointment will pass the valid input to the corresponding field in the newly initialised "appointment" objects.
+// gatherAppointmentInfo calls the helper functions repeatedly until a valid input is received from the user for all fields. This procedure is iterated for each appointment the user filled in details for.
+// If an error is received for a helper function, gatherAppointmentInfo calls the function again, and the user is prompted for a valid input.
+// If a valid input is received for a helper function, gatherAppointmentInfo will pass the valid input to the corresponding field in the newly initialised "appointment" objects.
 // The appointment objects are stored in a list to accommodate multiple appointments.
-// Once all fields in "appointment" are filled, getAppointment returns the list of "appointment" objects.
-func getAppointment(scanner *bufio.Scanner) []appointment {
-	appointments := make([]appointment, 0)
+// Once all fields in "appointment" are filled, gatherAppointmentInfo returns the list of "appointment" objects.
+func gatherAppointmentInfo(scanner *bufio.Scanner) appointment {
 
 	var d pet
 
@@ -364,9 +363,8 @@ func getAppointment(scanner *bufio.Scanner) []appointment {
 	}
 
 	a.pet = d
-	appointments = append(appointments, a)
 
-	return appointments
+	return a
 }
 
 // TODO: change to prevent user from deleting appointments that don't belong to them
@@ -413,4 +411,34 @@ func (a *appointment) summaryString(i int) string {
 	s += "-------------------------------------\n"
 
 	return s
+}
+
+func createNewAppointment(db *sql.DB, currentUser *user, appointmentInfo appointment) bool {
+	_, err := db.Exec(
+		`INSERT INTO appointments (
+						user_id,
+						pet_name,
+						pet_species,
+						pet_age,
+						pet_weight,
+						vaccinated,
+						appointment_type,
+						vet_name,
+						appointment_time
+					) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+		currentUser.id,
+		appointmentInfo.pet.name,
+		appointmentInfo.pet.species,
+		appointmentInfo.pet.age,
+		appointmentInfo.pet.weightKg,
+		appointmentInfo.pet.vaccinated,
+		appointmentInfo.appointmentType,
+		appointmentInfo.vet,
+		appointmentInfo.dateTime,
+	)
+	if err != nil {
+		fmt.Println("Error saving appointment to database:", err)
+		return true
+	}
+	return false
 }

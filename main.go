@@ -52,7 +52,6 @@ func getMainMenuChoice(scanner *bufio.Scanner) string {
 
 func main() {
 	var currentUser *user
-	var appointments []appointment
 
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -79,7 +78,6 @@ first:
 			for {
 				u := gatherUserInfo(scanner)
 				userCreated := createNewUser(u, db)
-				// TODO: change signature of createNewUser
 				if userCreated {
 					break
 				}
@@ -106,45 +104,18 @@ first:
 
 	}
 
-	// TODO: refactor this for into its own function
 	for {
-		userChoice := appointmentMenu(scanner)
+		userChoice := getAppointmentMenuChoice(scanner)
 
 		switch userChoice {
 		case "1":
 
-			newAppointments := getAppointment(scanner)
+			appointmentInfo := gatherAppointmentInfo(scanner)
 
-			// TODO: add appointment to db should be its own function
-			for _, a := range newAppointments {
-				_, err := db.Exec(
-					`INSERT INTO appointments (
-						user_id,
-						pet_name,
-						pet_species,
-						pet_age,
-						pet_weight,
-						vaccinated,
-						appointment_type,
-						vet_name,
-						appointment_time
-					) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-					currentUser.id,
-					a.pet.name,
-					a.pet.species,
-					a.pet.age,
-					a.pet.weightKg,
-					a.pet.vaccinated,
-					a.appointmentType,
-					a.vet,
-					a.dateTime,
-				)
-				if err != nil {
-					fmt.Println("Error saving appointment to database:", err)
-					return
-				}
+			isAppointmentCreated := createNewAppointment(db, currentUser, appointmentInfo)
+			if isAppointmentCreated {
+				return
 			}
-			appointments = append(appointments, newAppointments...)
 
 		case "2":
 			appts, err := getAppointmentsByUserID(db, currentUser.id)
