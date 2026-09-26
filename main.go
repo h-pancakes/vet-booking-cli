@@ -819,6 +819,7 @@ func main() {
 	defer db.Close()
 
 	// TODO: extract the following for into a function
+first:
 	for {
 		choice := getMainMenuChoice(scanner)
 
@@ -828,6 +829,7 @@ func main() {
 				u := gatherUserInfo(scanner)
 				userCreated := createNewUser(u, db)
 				// TODO: change signature of createNewUser
+				fmt.Printf(fmt.Sprintf("user creation complete: %t\n", userCreated))
 				if userCreated {
 					break
 				}
@@ -840,7 +842,7 @@ func main() {
 				if err == nil {
 					currentUser = u
 					userID = id
-					break
+					break first
 				}
 				fmt.Println("Error:", err)
 			}
@@ -854,7 +856,6 @@ func main() {
 			continue
 		}
 
-		break
 	}
 
 	// TODO: refactor this for into its own function
