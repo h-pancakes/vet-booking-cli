@@ -11,33 +11,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// allowedSpecies is a list that holds the options for choosing the pet's species for the appointment.
-var allowedSpecies = []string{
-	"Dog",
-	"Cat",
-	"Rabbit",
-	"Hamster",
-	"Gecko",
-	"Rat",
-}
-
-// allowedAppointmentTypes is a list that holds the types of appointments available to the user.
-var allowedAppointmentTypes = []string{
-	"Grooming",
-	"Vaccination",
-	"Surgical",
-	"Bath",
-	"Dental",
-}
-
-// allowedVets is a list that holds the veterinarians that are available to the user.
-var allowedVets = []string{
-	"Dr Smith",
-	"Dr Jones",
-	"Dr Dolittle",
-	"Dr Brown",
-}
-
 // getMainMenuChoice is a function that displays a menu screen to the user with 3 options.
 // The option that the user selects is normalised and then passed to main().
 func getMainMenuChoice(scanner *bufio.Scanner) string {
@@ -69,6 +42,8 @@ func main() {
 	}
 	defer db.Close()
 
+	UserService := NewUserService(NewUserRepo(db))
+
 first:
 	for {
 		choice := getMainMenuChoice(scanner)
@@ -76,11 +51,17 @@ first:
 		switch choice {
 		case "1":
 			for {
-				u := gatherUserInfo(scanner)
-				userCreated := createNewUser(u, db)
-				if userCreated {
-					break
+				var password []byte
+				firstName, lastName, phone, email, password, err := gatherUserInfo(scanner)
+
+				_, err = UserService.RegisterUser(
+					firstName, lastName, phone, email, password,
+				)
+				if err != nil {
+					fmt.Println("Error:", err)
+					continue
 				}
+				break
 			}
 
 		case "2":
