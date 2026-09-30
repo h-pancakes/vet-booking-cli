@@ -3,7 +3,7 @@ package main
 import "database/sql"
 
 type UserRepository interface {
-	Create(u user) (user, error)
+	CreateUser(u user) error
 	FindByEmail(email string) (user, error)
 }
 
@@ -15,15 +15,30 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 	return &UserRepo{DB: db}
 }
 
-func (r *UserRepo) FindUserByEmail(email string) (bool, error) {
-	var exists bool
+func (r *UserRepo) FindByEmail(email string) (user, error) {
+	var u user
+	err := r.DB.QueryRow(
+		`SELECT id, first_name, last_name, phone, email
+		FROM users
+		WHERE email = $1`,
+		email,
+	).Scan(&u.id, &u.firstName, &u.lastName, &u.phone, &u.email)
 
-	query := "SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)"
-
-	err := r.DB.QueryRow(query, email).Scan(&exists)
-	if err != nil {
-		return false, err
+	if err == sql.ErrNoRows {
+		return user{}, ErrEmailNotFound
 	}
+	if err != nil {
+		return user{}, err
+	}
+	return u, nil
+}
 
-	return exists, nil
+func (r *UserRepo) CreateUser(u user) error {
+
+	query := "INSERT INTO users (first_name, last_name, phone, email, password_hash) VALUES ($1, $2, $3, $4, $5)"
+
+	_, err := r.DB.Exec(query, u.firstName, u.lastName, u.phone, u.email, u.passwordHash)
+
+	// let service handle the err!
+	return err
 }
