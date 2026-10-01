@@ -22,6 +22,7 @@ var ErrInvalidPhoneCharacters = errors.New("phone number can only contain digits
 var ErrInvalidEmail = errors.New("must be a valid email address")
 var ErrDuplicateEmail = errors.New("email already taken")
 var ErrEmailNotFound = errors.New("email not found")
+var ErrInvalidEmailOrPassword = errors.New("invalid email or password")
 
 // for future use:
 var emailRe = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
