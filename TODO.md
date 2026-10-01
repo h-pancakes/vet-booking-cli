@@ -3,7 +3,7 @@
  - [ ] Add structured and consistent error codes - utilise err?
  - [ ] Add a way for users to UPDATE appointments
  - [x] Add a way for users to DELETE appointments
- - [ ] Split code into separate files and refactor main - cleaning up
+ - [ ] Split code into separate files AND PACKAGES and refactor main - cleaning up
  - [ ] Prevent appointment clashing
  - [x] Write unit tests - utilise Go's features!
  - [ ] Create pipeline / containerise application - Podman and Azure DevOps?
