@@ -1,5 +1,6 @@
 # To-do list
 
+ - [ ] Modify email and phone cli funcs to not do the prompt text themselves
  - [ ] Add structured and consistent error codes - utilise err?
  - [ ] Add a way for users to UPDATE appointments
  - [x] Add a way for users to DELETE appointments
