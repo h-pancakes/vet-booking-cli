@@ -71,6 +71,20 @@ func getExistingUser(scanner *bufio.Scanner, db *sql.DB) (*user, error) {
 	return &u, nil
 }
 
+func promptUserLogin(scanner *bufio.Scanner) (string, []byte, error) {
+	email, err := getUserEmail(scanner)
+	if err != nil {
+		return "", nil, err
+	}
+
+	password, err := getPassword("Please enter your password: ", 8)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return email, password, nil
+}
+
 // getUserPhone is a helper function that prompts the user for their phone number and stores it.
 // The stored number is normalised by removing unnecessary whitespace.
 // The number is passed through multiple validation checks and is returned if it passes all checks.
