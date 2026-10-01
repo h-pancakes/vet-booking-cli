@@ -23,7 +23,6 @@ func (s *UserService) RegisterUser(firstName, lastName, phone, email string, pas
 		return user{}, err
 	}
 
-	// finds out if email is already taken
 	_, err = s.repo.FindByEmail(u.email)
 	switch {
 	case err == nil:
@@ -43,7 +42,7 @@ func (s *UserService) RegisterUser(firstName, lastName, phone, email string, pas
 	hashedBytes, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 	if err != nil {
 		return user{}, fmt.Errorf("secure password generation failed: %w", err)
-	} // poop
+	}
 
 	u.passwordHash = string(hashedBytes)
 
@@ -52,5 +51,13 @@ func (s *UserService) RegisterUser(firstName, lastName, phone, email string, pas
 		return user{}, fmt.Errorf("database save failed: %w", err)
 	}
 
+	// wipe traces of password from memory
+	clear(password)
+	u.passwordHash = ""
+
 	return u, nil
+}
+
+func (s *UserService) LoginUser(email string, password []byte) {
+
 }
