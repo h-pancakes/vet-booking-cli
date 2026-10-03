@@ -3,30 +3,13 @@ package main
 import (
 	"bufio"
 	"database/sql"
-	"errors"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"golang.org/x/term"
 )
-
-var ErrLoginIdMustBePositive = errors.New("login ID must be a positive number")
-var ErrNameTooShort = errors.New("name must be at least 1 character")
-var ErrNameTooLong = errors.New("name cannot be more than 20 characters")
-var ErrNameContainsInvalidCharacters = errors.New("name can only contain A-Z, hyphens, and spaces")
-var ErrInvalidPhone = errors.New("phone number must be between 10 and 13 digits")
-var ErrInvalidPhoneCharacters = errors.New("phone number can only contain digits 0-9")
-var ErrInvalidEmail = errors.New("must be a valid email address")
-var ErrDuplicateEmail = errors.New("email already taken")
-var ErrEmailNotFound = errors.New("email not found")
-var ErrInvalidEmailOrPassword = errors.New("invalid email or password")
-
-// for future use:
-var emailRe = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-var phoneRe = regexp.MustCompile(`^\d{10,11,12,13}$`)
 
 // getExistingUser is a special function that is called when the user selects option "2" in the main menu to indicate they are an existing user.
 // The function prompts the user to enter their login ID to access their appointments saved on the database.
