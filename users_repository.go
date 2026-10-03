@@ -5,7 +5,7 @@ import "database/sql"
 type UserRepository interface {
 	CreateUser(u user) error
 	FindByEmail(email string) (user, error)
-	FindByEmailForLogin(email string) (string, error)
+	FindByEmailForLogin(email string) (user, []byte, error)
 }
 
 type UserRepo struct {
@@ -47,22 +47,23 @@ func (r *UserRepo) CreateUser(u user) error {
 	return err
 }
 
-func (r *UserRepo) FindByEmailForLogin(email string) (string, error) {
-	var passwordHash string
+func (r *UserRepo) FindByEmailForLogin(email string) (user, []byte, error) {
+	var passwordHash []byte
+	var u user
 	err := r.DB.QueryRow(
-		`SELECT password_hash
+		`SELECT id, first_name, last_name, phone, email, password_hash
 		FROM users
 		WHERE email = $1`,
 		email,
-	).Scan(&passwordHash)
+	).Scan(&u.id, &u.firstName, &u.lastName, &u.phone, &u.email, &passwordHash)
 
 	if err == sql.ErrNoRows {
-		return passwordHash, ErrInvalidEmailOrPassword
+		return u, passwordHash, ErrInvalidEmailOrPassword
 	}
 
 	if err != nil {
-		return "", err
+		return user{}, []byte{}, err
 	}
 
-	return passwordHash, nil
+	return u, passwordHash, nil
 }

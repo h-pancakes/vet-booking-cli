@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -54,6 +55,10 @@ first:
 				var password []byte
 				firstName, lastName, phone, email, password, err := gatherUserInfo(scanner)
 
+				if err != nil {
+					fmt.Println("Error", err)
+				}
+
 				_, err = UserService.RegisterUser(
 					firstName, lastName, phone, email, password,
 				)
@@ -66,12 +71,25 @@ first:
 
 		case "2":
 			for {
-				u, err := getExistingUser(scanner, db)
-				if err == nil {
-					currentUser = u
-					break first
+				email, password, err := promptUserLogin(scanner)
+
+				if err != nil {
+					fmt.Println("Error: ", err)
+					continue
 				}
-				fmt.Println("Error:", err)
+
+				loggedInUser, err := UserService.LoginUser(email, password)
+				if err != nil {
+					if errors.Is(err, ErrInvalidEmailOrPassword) {
+						fmt.Println(ErrInvalidEmailOrPassword)
+					} else {
+						fmt.Println("Login failed:", err)
+					}
+					continue
+				}
+				// This is not ideal but mix of pass by val and pass by pointer - Fix!
+				currentUser = &loggedInUser
+				break first
 			}
 
 		case "3":

@@ -58,6 +58,22 @@ func (s *UserService) RegisterUser(firstName, lastName, phone, email string, pas
 	return u, nil
 }
 
-func (s *UserService) LoginUser(email string, password []byte) {
+func (s *UserService) LoginUser(email string, password []byte) (user, error) {
+	u, hashedPassword, err := s.repo.FindByEmailForLogin(email)
 
+	if err != nil {
+		return user{}, fmt.Errorf("database query failed: %w", err)
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashedPassword, password)
+
+	if err != nil {
+		return user{}, ErrInvalidEmailOrPassword
+	}
+
+	// wipe traces of password from memory
+	clear(password)
+	u.passwordHash = ""
+
+	return u, err
 }
