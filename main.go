@@ -66,6 +66,7 @@ first:
 					fmt.Println("Error:", err)
 					continue
 				}
+				fmt.Println("Account created successfully!")
 				break
 			}
 
@@ -89,6 +90,7 @@ first:
 				}
 				// This is not ideal but mix of pass by val and pass by pointer - Fix!
 				currentUser = &loggedInUser
+				fmt.Println("Welcome,", currentUser.firstName)
 				break first
 			}
 
