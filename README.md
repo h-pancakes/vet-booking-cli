@@ -41,5 +41,8 @@ go run .
  - Major bug in DELETE function that doesn't prevent a user from deleting any appointment, regardless of whether they own it or not i.e. using an older placeholder method of deletion, not to mention mixing db logic and business logic
  - Current layout of code across files is messy and lacks splitting into directories and packages
  - Some CLI functions like getUserPhone and getUserEmail are not uniform with similar get functions as they also contain the prompt instead of the prompt being passed in as a parameter
+ - Failed appointment save in createNewAppointment (legacy function) exits the program on failed database save
+ - Email validation is not extensive enough (perhaps will replace with regex)
+
 
  - Program is not containerised yet and so is tedious to install and run
