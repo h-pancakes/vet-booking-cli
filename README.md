@@ -1,7 +1,7 @@
 # vet-booking-cli
 
-A simple CLI veterinary appointment booking system written in Go.
-Users can log in, create and view appointments stored in a PostgreSQL database.
+A menu-driven CLI program written in Go.
+Users can log in via email and password, create, read, and delete veterinary appointments for their pets.
 
 # Requirements
 
@@ -32,6 +32,14 @@ DATABASE_URL=postgres://username:password@localhost:5432/vet_booking?sslmode=dis
 7. Run program:
 go run .
 
-# Notes
+# Known limitations
 
-Check out TODO.md for upcoming features!
+ - Business logic is not fully implemented yet e.g. appointment clashing
+ - Error handling is inconsistent/missing in certain parts like legacy code parts (scanner errors)
+ - Complete refactoring to new layered architecture currently only limited to user service, not appointment service
+ - Tests are present but are not extensive enough and dont cover crucial parts of the application
+ - Major bug in DELETE function that doesn't prevent a user from deleting any appointment, regardless of whether they own it or not i.e. using an older placeholder method of deletion, not to mention mixing db logic and business logic
+ - Current layout of code across files is messy and lacks splitting into directories and packages
+ - Some CLI functions like getUserPhone and getUserEmail are not uniform with similar get functions as they also contain the prompt instead of the prompt being passed in as a parameter
+
+ - Program is not containerised yet and so is tedious to install and run
