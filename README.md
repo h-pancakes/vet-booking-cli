@@ -1,14 +1,27 @@
 # vet-booking-cli
 
-A menu-driven CLI program written in Go.
-Users can log in via email and password, create, read, and delete veterinary appointments for their pets.
+## Introduction
 
-# Requirements
+This project is a menu-driven CLI program for pet owners to book veterinary appointments for their pets written in Go as a learning project to demonstrate the Go features and broader engineering concepts I self-taught myself from multiple sources, beginning with the book "Introducing Go" by Caleb Doxsey around the start of the first year of my Software Engineering BSc degree and then continuing using online blogposts and various LLMs (strictly as tutors!) to continue development at an organic, relaxed pace. I began writing this program following a month of reading and going through the exercises detailed in the aforementioned textbook during my spare time before deciding to write my own small program I, very thoughtfully, named dogProject! (it was originally just for dogs for some reason)
+
+Over the months it had ballooned into an approximately thousand-line chunk of code that would compile, but now was quite daunting to return to after long breaks to pick up where I had left off. It was around this time that I decided (now about to begin the second year of my degree after summer break) to try and finish this project, first by adding the features that I had loosely envisioned, and then by cleaning it up i.e. splitting up the code into files and using the Go's packages to organise my codebase.
+
+As I began taking the first steps, like figuring out where to split up the now monstrously large main.go file, I was informed by a senior mentor (who is an industry expert) that I should implement certain architectural practices into my code now, given that the current state was going to impact future development. I was introduced to concepts like decoupling the database queries from the business logic, mocking database repositories, and modular code. 
+
+If I could begin again, I would definitely try to begin with a structured modular codebase to make my code more maintainable and scalable, and I ensure I have a clearer idea of the domain that I am modeling the application for (though still keeping it flexibile, as I have learnt that "Big Design Up Front" is considered an antipattern!). I would also attempt to work around a more complex domain to really showcase intuitiveness about the business rules that I am modelling the code around.
+
+Thank you for viewing my project!
+
+## Brief functional overview
+
+Pet owners can log in via using their email and a password to book, view, and delete appointments for their pets via simple multiple-choice menus with free-entry fields where necessary. It uses postgreSQL to persist data in a database and implements password hashing using the bcrypt library.
+
+## Requirements
 
 - Go 1.20+
 - PostgreSQL
 
-# Setup
+## Setup
 
 1. Create a PostgreSQL database:
 CREATE DATABASE vet_booking;
@@ -32,17 +45,19 @@ DATABASE_URL=postgres://username:password@localhost:5432/vet_booking?sslmode=dis
 7. Run program:
 go run .
 
-# Known limitations
+## Known limitations
 
- - Business logic is not fully implemented yet e.g. appointment clashing
- - Error handling is inconsistent/missing in certain parts like legacy code parts (scanner errors)
- - Complete refactoring to new layered architecture currently only limited to user service, not appointment service
+ [x] Business logic is not fully implemented yet e.g. appointment clashing
+ [x] Error handling is inconsistent/missing in certain parts like legacy code parts (scanner errors)
+ [x] Complete refactoring to new layered architecture currently only limited to user service, not appointment service
  - Tests are present but are not extensive enough and dont cover crucial parts of the application
- - Major bug in DELETE function that doesn't prevent a user from deleting any appointment, regardless of whether they own it or not i.e. using an older placeholder method of deletion, not to mention mixing db logic and business logic
- - Current layout of code across files is messy and lacks splitting into directories and packages
+ [x] Major bug in DELETE function that doesn't prevent a user from deleting any appointment, regardless of whether they own it or not i.e. using an older placeholder method of deletion, not to mention mixing db logic and business logic
+ [x] Current layout of code across files is messy and lacks splitting into directories and packages
  - Some CLI functions like getUserPhone and getUserEmail are not uniform with similar get functions as they also contain the prompt instead of the prompt being passed in as a parameter
- - Failed appointment save in createNewAppointment (legacy function) exits the program on failed database save
+ [x] Failed appointment save in createNewAppointment (legacy function) exits the program on failed database save
  - Email validation is not extensive enough (perhaps will replace with regex)
 
 
  - Program is not containerised yet and so is tedious to install and run
+ - Pet can become its own table in the database. (one pet can have multiple appointments)
+ - Maybe should use explicit data transfer objects between service and repo instead of passing user object to repo from memory. Instead pass raw fields to keep it dumb?
