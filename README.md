@@ -61,4 +61,5 @@ go run .
  - Program is not containerised yet and so is tedious to install and run
  - Pet can become its own table in the database. (one pet can have multiple appointments)
  - Maybe should use explicit data transfer objects between service and repo instead of passing user object to repo from memory. Instead pass raw fields to keep it dumb?
- - ID values (ID and userID) perhaps should be integers instead of strings to better match their purpose. Also they work right now with postgreSQL but I am unsure if they would work with another database. Minor, but still noteworthy.
+ - ID values (ID and userID) perhaps should be integers instead of strings to better match their purpose. Also they work right now with postgreSQL but I am unsure if they would work with another database. Minor, but still noteworthy
+ - Business logic, but when a user logs out, it would be nice to get the back to the main menu instead of just ending the program
