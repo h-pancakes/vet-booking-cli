@@ -47,19 +47,15 @@ go run .
 
 ## Known limitations
 
- [x] Business logic is not fully implemented yet e.g. appointment clashing
- [x] Error handling is inconsistent/missing in certain parts like legacy code parts (scanner errors)
- [x] Complete refactoring to new layered architecture currently only limited to user service, not appointment service
+ - Business logic is not fully implemented yet e.g. appointment clashing
+ - Error handling is inconsistent/missing in certain parts like legacy code parts (scanner errors)
  - Tests are present but are not extensive enough and dont cover crucial parts of the application
- [x] Major bug in DELETE function that doesn't prevent a user from deleting any appointment, regardless of whether they own it or not i.e. using an older placeholder method of deletion, not to mention mixing db logic and business logic
- [x] Current layout of code across files is messy and lacks splitting into directories and packages
+ - Current layout of code across files is messy and lacks splitting into directories and packages
  - Some CLI functions like getUserPhone and getUserEmail are not uniform with similar get functions as they also contain the prompt instead of the prompt being passed in as a parameter
- [x] Failed appointment save in createNewAppointment (legacy function) exits the program on failed database save
  - Email validation is not extensive enough (perhaps will replace with regex)
 
 
  - Program is not containerised yet and so is tedious to install and run
- - Pet can become its own table in the database. (one pet can have multiple appointments)
  - Maybe should use explicit data transfer objects between service and repo instead of passing user object to repo from memory. Instead pass raw fields to keep it dumb?
  - ID values (ID and userID) perhaps should be integers instead of strings to better match their purpose. Also they work right now with postgreSQL but I am unsure if they would work with another database. Minor, but still noteworthy
- - Business logic, but when a user logs out, it would be nice to get the back to the main menu instead of just ending the program
+ - When a user logs out, it would be nice to get the back to the main menu instead of just ending the program
