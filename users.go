@@ -2,57 +2,12 @@ package main
 
 import (
 	"bufio"
-	"database/sql"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"golang.org/x/term"
 )
-
-// getExistingUser is a special function that is called when the user selects option "2" in the main menu to indicate they are an existing user.
-// The function prompts the user to enter their login ID to access their appointments saved on the database.
-// The user's email is normalised, then subsequently validated, and the database is queried for a row with a matching ID.
-// If there is a matching ID, that row's contents are fetched and placed in memory.
-func getExistingUser(scanner *bufio.Scanner, db *sql.DB) (*user, error) {
-	fmt.Println("Please enter your login ID:")
-	fmt.Print("> ")
-
-	scanner.Scan()
-	email := strings.TrimSpace(scanner.Text())
-
-	id, err := strconv.Atoi(email)
-	if err != nil || id <= 0 {
-		return nil, fmt.Errorf("login ID must be a positive number")
-	}
-
-	var u user
-
-	err = db.QueryRow(
-		`SELECT id, first_name, last_name, phone, email
-		 FROM users
-		 WHERE id = $1`,
-		id,
-	).Scan(
-		&u.id,
-		&u.firstName,
-		&u.lastName,
-		&u.phone,
-		&u.email,
-	)
-
-	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("no user found with that ID")
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println("Welcome,", u.firstName)
-
-	return &u, nil
-}
 
 func promptUserLogin(scanner *bufio.Scanner) (string, []byte, error) {
 	email, err := getUserEmail(scanner)
@@ -68,10 +23,6 @@ func promptUserLogin(scanner *bufio.Scanner) (string, []byte, error) {
 	return email, password, nil
 }
 
-// getUserPhone is a helper function that prompts the user for their phone number and stores it.
-// The stored number is normalised by removing unnecessary whitespace.
-// The number is passed through multiple validation checks and is returned if it passes all checks.
-// If validation fails, an error is returned.
 func getUserPhone(scanner *bufio.Scanner) (string, error) {
 	var email string
 
@@ -102,10 +53,6 @@ func getUserPhone(scanner *bufio.Scanner) (string, error) {
 	return email, nil
 }
 
-// getUserEmail is a helper function that prompts the user for their email address and stores it.
-// The stored email address is normalised by removing unnecessary whitespace.
-// The email address is passed through multiple validation checks and is returned if it passes all checks.
-// If validation fails, an error is returned.
 func getUserEmail(scanner *bufio.Scanner) (string, error) {
 	var email string
 
@@ -266,8 +213,8 @@ func gatherUserInfo(scanner *bufio.Scanner) (string, string, string, string, []b
 	return firstName, lastName, phone, email, password, nil
 }
 
-// String prints a summary of the user's details.
-func (u user) String() string {
+// UserSummaryString prints a summary of the user's details.
+func (u user) UserSummaryString() string {
 	var s string
 	s = "-------------------------------------\n"
 	s += "Owner details:\n"
@@ -280,6 +227,7 @@ func (u user) String() string {
 	return s
 }
 
+// Buffer between CLI validation layer with scanner and service layer. Core business logic here
 func NewUser(firstName, lastName, phone, email string) (user, error) {
 	firstName = strings.TrimSpace(firstName)
 	if firstName == "" {
