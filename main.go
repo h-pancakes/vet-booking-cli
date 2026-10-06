@@ -25,7 +25,7 @@ func getMainMenuChoice(scanner *bufio.Scanner) string {
 }
 
 func main() {
-	var currentUser *user
+	var CurrentUser user
 
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -38,12 +38,13 @@ func main() {
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		fmt.Println("Error connecting to database:", err)
+		fmt.Println("Error connecting to database:", ErrDatabaseConnectionFailure)
 		return
 	}
 	defer db.Close()
 
 	UserService := NewUserService(NewUserRepo(db))
+	AppointmentService := NewAppointmentService(NewAppointmentRepo(db))
 
 first:
 	for {
@@ -79,7 +80,7 @@ first:
 					continue
 				}
 
-				loggedInUser, err := UserService.LoginUser(email, password)
+				LoggedInUser, err := UserService.LoginUser(email, password)
 				if err != nil {
 					if errors.Is(err, ErrInvalidEmailOrPassword) {
 						fmt.Println(ErrInvalidEmailOrPassword)
@@ -88,9 +89,9 @@ first:
 					}
 					continue
 				}
-				// This is not ideal but mix of pass by val and pass by pointer - Fix!
-				currentUser = &loggedInUser
-				fmt.Println("Welcome,", currentUser.firstName)
+				// Why is there currentUser AND loggedInUser???
+				CurrentUser = LoggedInUser
+				fmt.Println("Welcome,", CurrentUser.firstName)
 				break first
 			}
 
@@ -111,49 +112,63 @@ first:
 		switch userChoice {
 		case "1":
 
-			appointmentInfo := gatherAppointmentInfo(scanner)
+			petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentType, vet, appointmentTime := gatherAppointmentInfo(scanner)
 
-			isAppointmentCreated := createNewAppointment(db, currentUser, appointmentInfo)
-			if isAppointmentCreated {
-				return
+			// TODO: Add error handling to gatherAppointmentInfo
+
+			_, err = AppointmentService.BookAppointment(CurrentUser.id, appointmentType, vet, petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentTime)
+
+			if err != nil {
+				fmt.Println("Error:", err)
+				continue
 			}
+
+			fmt.Println("Appointment booked successfully!")
 
 		case "2":
-			appts, err := getAppointmentsByUserID(db, currentUser.id)
+			appointments, err := AppointmentService.ViewAppointments(CurrentUser.id)
 			if err != nil {
-				fmt.Println("Error: ", err)
+				fmt.Println("Error:", err)
 				continue
 			}
 
-			if len(appts) == 0 {
-				fmt.Println("No appointments yet.")
-				continue
-			}
+			fmt.Println(CurrentUser.UserSummaryString())
 
-			fmt.Println(currentUser)
-			for i, a := range appts {
+			for i, a := range appointments {
 				fmt.Println(a.summaryString(i + 1))
 			}
 
 		case "3":
-			appts, err := getAppointmentsByUserID(db, currentUser.id)
+			appointments, err := AppointmentService.ViewAppointments(CurrentUser.id)
 			if err != nil {
-				fmt.Println("Error: ", err)
+				fmt.Println("Error:", err)
 				continue
 			}
 
-			if len(appts) == 0 {
-				fmt.Println("No appointments to delete.")
-				continue
-			}
-
-			for i, a := range appts {
+			for i, a := range appointments {
 				fmt.Println(a.summaryString(i + 1))
 			}
 
-			if err := deleteAppointment(scanner, db); err != nil {
+			index, err := promptUserDeleteAppointment(scanner)
+			if err != nil {
+				fmt.Println(ErrInvalidAppointmentNumber)
+				continue
+			}
+
+			if index < 0 || index >= len(appointments) {
+				fmt.Println("Error:", ErrInvalidAppointmentNumber)
+				continue
+			}
+
+			chosenAppointment := appointments[index]
+
+			err = AppointmentService.RemoveAppointment(chosenAppointment)
+
+			if err != nil {
 				fmt.Println("Error:", err)
 			}
+
+			fmt.Println("Appointment deleted successfully!")
 
 		case "4":
 			fmt.Println("Goodbye!")
