@@ -11,12 +11,10 @@ type UserService struct {
 	repo UserRepository
 }
 
-// this is a constructor - for abstraction
 func NewUserService(r UserRepository) *UserService {
 	return &UserService{repo: r}
 }
 
-// vertical slice for user side ONLY
 func (s *UserService) RegisterUser(firstName, lastName, phone, email string, password []byte) (user, error) {
 	u, err := NewUser(firstName, lastName, phone, email)
 	if err != nil {
@@ -51,7 +49,7 @@ func (s *UserService) RegisterUser(firstName, lastName, phone, email string, pas
 		return user{}, fmt.Errorf("database save failed: %w", err)
 	}
 
-	// wipe traces of password from memory
+	// this helps wipe traces of hashed and plain passwords from memory
 	clear(password)
 	u.passwordHash = ""
 
@@ -71,7 +69,6 @@ func (s *UserService) LoginUser(email string, password []byte) (user, error) {
 		return user{}, ErrInvalidEmailOrPassword
 	}
 
-	// wipe traces of password from memory
 	clear(password)
 	u.passwordHash = ""
 
