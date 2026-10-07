@@ -45,7 +45,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/vet_booking?sslmode=dis
 7. Run program:
 go run .
 
-## Known limitations
+## Known limitations / Techincal debt
 
  - Business logic is not fully implemented yet e.g. appointment clashing
  - Error handling is inconsistent/missing in certain parts like legacy code parts (scanner errors)
@@ -53,7 +53,7 @@ go run .
  - Current layout of code across files is messy and lacks splitting into directories and packages
  - Some CLI functions like getUserPhone and getUserEmail are not uniform with similar get functions as they also contain the prompt instead of the prompt being passed in as a parameter
  - Email validation is not extensive enough (perhaps will replace with regex)
- - Multiple layers use the same structs in models.go, this creates some coupling as changing the fields may break code in multiple layers when it should't :(
+ - Multiple layers use the same structs in models.go, this creates some coupling as changing the fields may break code in multiple layers when it should't. I should also keep structures always in a valid state
 
 
  - Program is not containerised yet and so is tedious to install and run
