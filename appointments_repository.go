@@ -5,6 +5,7 @@ import "database/sql"
 type AppointmentsRepository interface {
 	CreateAppointment(userID string, a appointment) error
 	RetrieveAppointments(userID string) ([]appointment, error)
+	UpdateAppointment(id, userID string, a appointment) error
 	DeleteAppointment(id, userID string) error
 }
 
@@ -54,6 +55,19 @@ func (r *AppointmentRepo) RetrieveAppointments(userID string) ([]appointment, er
 	}
 
 	return appointments, nil
+}
+
+func (r *AppointmentRepo) UpdateAppointment(id, userID string, a appointment) error {
+
+	query := "UPDATE appointments SET pet_name = $1, pet_species = $2, pet_age = $3, pet_weight = $4, vaccinated = $5, appointment_type = $6, vet_name = $7, appointment_time = $8 WHERE id = $9 AND user_id = $10"
+
+	_, err := r.DB.Exec(query, a.petName, a.petSpecies, a.petAge, a.petWeightKg, a.petVaccinated, a.appointmentType, a.vet, a.dateTime, a.id, a.userID)
+
+	if err != nil {
+		return ErrDatabaseQueryFailure
+	}
+
+	return nil
 }
 
 func (r *AppointmentRepo) DeleteAppointment(id, userID string) error {
