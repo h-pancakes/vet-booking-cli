@@ -11,8 +11,9 @@ import (
 func getAppointmentMenuChoice(scanner *bufio.Scanner) string {
 	fmt.Println("1. Create new appointment")
 	fmt.Println("2. View existing appointments")
-	fmt.Println("3. Delete an appointment")
-	fmt.Println("4. Exit")
+	fmt.Println("3. Update an existing appointment")
+	fmt.Println("4. Delete an appointment")
+	fmt.Println("5. Exit")
 	fmt.Print("> ")
 
 	scanner.Scan()
@@ -230,6 +231,23 @@ func (a *appointment) summaryString(i int) string {
 
 func promptUserDeleteAppointment(scanner *bufio.Scanner) (int, error) {
 	fmt.Println("Enter appointment number to delete:")
+	fmt.Print(">")
+
+	scanner.Scan()
+	input := strings.TrimSpace(scanner.Text())
+
+	appointmentNumber, err := strconv.Atoi(input)
+	if err != nil {
+		return -67, ErrInvalidAppointmentNumber
+	}
+
+	userChoice := appointmentNumber - 1
+
+	return userChoice, nil
+}
+
+func promptUserUpdateAppointment(scanner *bufio.Scanner) (int, error) {
+	fmt.Println("Enter appointment number to update: ")
 	fmt.Print(">")
 
 	scanner.Scan()

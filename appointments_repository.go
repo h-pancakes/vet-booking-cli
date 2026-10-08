@@ -61,7 +61,7 @@ func (r *AppointmentRepo) UpdateAppointmentForUser(id, userID string, a appointm
 
 	query := "UPDATE appointments SET pet_name = $1, pet_species = $2, pet_age = $3, pet_weight = $4, vaccinated = $5, appointment_type = $6, vet_name = $7, appointment_time = $8 WHERE id = $9 AND user_id = $10"
 
-	result, err := r.DB.Exec(query, a.petName, a.petSpecies, a.petAge, a.petWeightKg, a.petVaccinated, a.appointmentType, a.vet, a.dateTime, a.id, a.userID)
+	result, err := r.DB.Exec(query, a.petName, a.petSpecies, a.petAge, a.petWeightKg, a.petVaccinated, a.appointmentType, a.vet, a.dateTime, id, userID)
 	if err != nil {
 		return ErrDatabaseQueryFailure
 	}

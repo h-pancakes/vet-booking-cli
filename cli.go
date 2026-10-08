@@ -78,13 +78,15 @@ first:
 		userChoice := getAppointmentMenuChoice(scanner)
 
 		switch userChoice {
+
+		// Option to create new appointment
 		case "1":
 
 			petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentType, vet, appointmentTime := gatherAppointmentInfo(scanner)
 
 			// TODO: Add error handling to gatherAppointmentInfo
 
-			_, err = AppointmentService.BookAppointment(CurrentUser.id, appointmentType, vet, petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentTime)
+			err = AppointmentService.BookAppointment(CurrentUser.id, appointmentType, vet, petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentTime)
 
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -93,6 +95,7 @@ first:
 
 			fmt.Println("Appointment booked successfully!")
 
+		// Option to view apppointments
 		case "2":
 			appointments, err := AppointmentService.ViewAppointments(CurrentUser.id)
 			if err != nil {
@@ -106,7 +109,43 @@ first:
 				fmt.Println(a.summaryString(i + 1))
 			}
 
+		// Option to update an appointment
 		case "3":
+			appointments, err := AppointmentService.ViewAppointments(CurrentUser.id)
+			if err != nil {
+				fmt.Println("Error:", err)
+				continue
+			}
+
+			for i, a := range appointments {
+				fmt.Println(a.summaryString(i + 1))
+			}
+
+			index, err := promptUserUpdateAppointment(scanner)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			if index < 0 || index >= len(appointments) {
+				fmt.Println("Error:", ErrInvalidAppointmentNumber)
+				continue
+			}
+
+			chosenAppointment := appointments[index]
+
+			petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentType, vet, appointmentTime := gatherAppointmentInfo(scanner)
+
+			err = AppointmentService.UpdateAppointment(chosenAppointment.id, CurrentUser.id, appointmentType, vet, petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentTime)
+			if err != nil {
+				fmt.Println("Error:", err)
+				continue
+			}
+
+			fmt.Println("Appointment updated successfully!")
+
+		// Option to delete an appointment
+		case "4":
 			appointments, err := AppointmentService.ViewAppointments(CurrentUser.id)
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -119,7 +158,7 @@ first:
 
 			index, err := promptUserDeleteAppointment(scanner)
 			if err != nil {
-				fmt.Println(ErrInvalidAppointmentNumber)
+				fmt.Println(err)
 				continue
 			}
 
@@ -130,7 +169,7 @@ first:
 
 			chosenAppointment := appointments[index]
 
-			err = AppointmentService.RemoveAppointment(chosenAppointment)
+			err = AppointmentService.RemoveAppointment(chosenAppointment.id, CurrentUser.id)
 
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -138,7 +177,8 @@ first:
 
 			fmt.Println("Appointment deleted successfully!")
 
-		case "4":
+		// Option to exit menu and end program
+		case "5":
 			fmt.Println("Goodbye!")
 			return true
 

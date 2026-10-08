@@ -13,24 +13,24 @@ func NewAppointmentService(r AppointmentsRepository) *AppointmentService {
 	return &AppointmentService{repo: r}
 }
 
-func (s *AppointmentService) BookAppointment(userID, appointmentType, vet, petName, petSpecies string, petAge int, petWeightKg float64, petVaccinated bool, appointmentTime time.Time) (appointment, error) {
+func (s *AppointmentService) BookAppointment(userID, appointmentType, vet, petName, petSpecies string, petAge int, petWeightKg float64, petVaccinated bool, appointmentTime time.Time) error {
 
 	a, err := NewAppointment(appointmentType, vet, petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentTime)
 
 	if err != nil {
-		return appointment{}, err
+		return err
 	}
 
-	err = s.repo.CreateAppointment(userID, a)
+	err = s.repo.CreateAppointmentForUser(userID, a)
 	if err != nil {
-		return appointment{}, fmt.Errorf("database save failed: %w", err)
+		return fmt.Errorf("database save failed: %w", err)
 	}
 
-	return a, nil
+	return nil
 }
 
 func (s *AppointmentService) ViewAppointments(userID string) ([]appointment, error) {
-	appointments, err := s.repo.RetrieveAppointments(userID)
+	appointments, err := s.repo.RetrieveAppointmentsForUser(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -39,12 +39,34 @@ func (s *AppointmentService) ViewAppointments(userID string) ([]appointment, err
 		return nil, ErrNoAppointmentsFound
 	}
 
+	for _, a := range appointments {
+		if a.userID != userID {
+			return nil, ErrUnauthorised
+		}
+	}
+
 	return appointments, err
 }
 
-func (s AppointmentService) RemoveAppointment(appointment appointment) error {
+func (s *AppointmentService) UpdateAppointment(appointmentID, userID, appointmentType, vet, petName, petSpecies string, petAge int, petWeightKg float64, petVaccinated bool, appointmentTime time.Time) error {
 
-	err := s.repo.DeleteAppointment(appointment.id, appointment.userID)
+	a, err := NewAppointment(appointmentType, vet, petName, petSpecies, petAge, petWeightKg, petVaccinated, appointmentTime)
+
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.UpdateAppointmentForUser(appointmentID, userID, a)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s AppointmentService) RemoveAppointment(appointmentID, userID string) error {
+
+	err := s.repo.DeleteAppointmentForUser(appointmentID, userID)
 
 	if err != nil {
 		return err
